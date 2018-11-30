@@ -2,6 +2,8 @@
 Source code of HG-means clustering
 
 # Run:
-make clean
-make
-./hgmeans.sh
+`make clean`
+
+`make`
+
+`./hgmeans.sh`
