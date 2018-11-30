@@ -3,7 +3,6 @@
 #include "hamerly/dataset.h"
 #include "hamerly/general_functions.h"
 #include "hamerly/hamerly_kmeans.h"
-// #include "MinAssignment.h"
 #include "Heap.h"
 #include "Hash.h"
 #include "Param.h"
@@ -156,22 +155,14 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
             } else {
                 Solution* y_pred = r->getSolution();
                 Solution* y_ = new Solution(y, 0.0, x, m);
-                // double** c_pred = assignmentToCentroids(y_pred, x, m);
-                // double** c = assignmentToCentroids(y, x, m);
-
                 Evaluator * eval = new Evaluator(n, m, d,
-                    y_pred->getAssignment(), y, y_pred->getCentroids(), y_->getCentroids());
-                
+                    y_pred->getAssignment(), y, y_pred->getCentroids(), y_->getCentroids());                
                 crand = eval->cRand();
                 nmi = eval->nmi();
                 ci = eval->centroidIndex();
-                // deleteMatrix(c_pred, m);
-                // deleteMatrix(c, m);
                 delete eval;
                 delete y_;
             }
-            
-            // delete [] y;
         }
 
         if(SAVE_FILE) {
@@ -220,12 +211,8 @@ vector<long> minAssignment(double** mat, int m) {
 }
 
 Solution* crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, double alpha) {
-    int d = x->d;
-    
+    int d = x->d;    
     unsigned short* offspring = new unsigned short[x->n];
-
-    // double** c1 = assignmentToCentroids(p1->getAssignment(), x, m); // O(nd)
-    // double** c2 = assignmentToCentroids(p2->getAssignment(), x, m); // O(nd)
     double** c1 = p1->getCentroids();
     double** c2 = p2->getCentroids();
     double** c3 = new double* [m];
@@ -250,14 +237,7 @@ Solution* crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, d
     }
 
     Solution* off = new Solution(c3, alpha, x, m);
-    // off->centroidsToAssignment(x, m);
     off->fixSolution(x, m, alpha);
-
-    // fixSolution(off->getAssignment(), x, m, alpha);
-
-    // deleteMatrix(c1, m);
-    // deleteMatrix(c2, m);
-    // deleteMatrix(c3, m);
     deleteMatrix(matrix, m);
 
     return off;
@@ -404,12 +384,8 @@ Solution* mutation(Solution* off, const Dataset* x, const int m, double alpha) {
 
     unsigned short* offspring = off->getAssignment();
     unsigned short* mutated = new unsigned short[x->n];
-
     // Randomly select one centroid to remove it from the solution
     int barycenter = rand() % m;
-
-    // double** c3 = assignmentToCentroids(offspring, x, m); // O(nd)
-
     double** c3 = off->getCentroids();
 
     // Keep the data points assigned to the centroid to be removed
@@ -475,13 +451,9 @@ Solution* mutation(Solution* off, const Dataset* x, const int m, double alpha) {
             mutated[i] = barycenter;
         }
     }
-
+    
     Solution* mutatedSolution = new Solution(mutated, alpha, x, m);
     mutatedSolution->fixSolution(x, m, alpha);
-
-    // fixSolution(mutated, x, m, alpha);
-
-    // deleteMatrix(c3, m);
     deleteMatrix(newcentroids, m);
 
     return mutatedSolution;
