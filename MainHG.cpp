@@ -175,24 +175,13 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
 }
 
 // Get the centroids assignment (perfect matching)
-vector< vector<double> > assignment(double** c1, double** c2, int m, int d) { //O(m^2d)
-    vector< vector<double> > matrix(m, vector<double>(m));
-    for(int i = 0; i < m; i++) {
-        for(int j = 0; j < m; j++) {
-            matrix[i][j] = MathUtils::squaredEuclidean(c1[i], c2[j], d);
-        }
-    }
-    return matrix;
-}
-
-vector<long> minAssignment(vector< vector<double> > mat, int m) {
+vector<long> minAssignment(double** c1, double** c2, int m, int d) { //O(m^2d)
     dlib::matrix<double> cost(m,m);
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < m; j++) {
-            cost(i,j) = -1.0 * mat[i][j];
+            cost(i,j) = -1.0 * MathUtils::squaredEuclidean(c1[i], c2[j], d);
         }
     }
-    // Max cost assignment of Dlib with negative costs in matrix
     std::vector<long> assignment = max_cost_assignment(cost);
     return assignment;
 }
@@ -207,8 +196,8 @@ Solution* crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, d
         c3[i] = new double[d];
     }
 
-    vector< vector<double> > matrix = assignment(c1, c2, m, d); // O(m^2 d)
-    vector<long> matching = minAssignment(matrix, m); // O(m^3)  Hungarian method
+    // vector< vector<double> > matrix = assignment(c1, c2, m, d); // O(m^2 d)
+    vector<long> matching = minAssignment(c1, c2, m, d); // O(m^3)  Hungarian method
 
     for(int i = 0; i < m; i++) { // O(md)
         if((rand() % 2) == 0) {
