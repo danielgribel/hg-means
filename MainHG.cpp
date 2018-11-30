@@ -3,7 +3,7 @@
 #include "hamerly/dataset.h"
 #include "hamerly/general_functions.h"
 #include "hamerly/hamerly_kmeans.h"
-#include "MinAssignment.h"
+// #include "MinAssignment.h"
 #include "Heap.h"
 #include "Hash.h"
 #include "Param.h"
@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <queue>
+#include "dlib-master/dlib/optimization/max_cost_assignment.h"
 
 using namespace std;
 
@@ -29,7 +30,6 @@ using namespace std;
 #define CLASS_PATH "labels/"
 
 PbRun * gaLoop(Dataset const *x, unsigned short k, Param parameters);
-void fixSolution(unsigned short* solution, const Dataset* x, const int m, double alpha);
 
 void deleteMatrix(double** matrix, int m) {
     for(int i = 0; i < m; i++) {
@@ -205,6 +205,18 @@ double** assignment(double** c1, double** c2, int m, int d) { //O(m^2d)
     }
 
     return matrix;
+}
+
+vector<long> minAssignment(double** mat, int m) {
+    dlib::matrix<double> cost(m,m);
+    for(int i = 0; i < m; i++) {
+        for(int j = 0; j < m; j++) {
+            cost(i,j) = -1.0 * mat[i][j];
+        }
+    }
+    // Max cost assignment of Dlib with negative costs in matrix
+    std::vector<long> assignment = max_cost_assignment(cost);
+    return assignment;
 }
 
 Solution* crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, double alpha) {
