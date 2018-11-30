@@ -30,13 +30,6 @@ using namespace std;
 
 PbRun * gaLoop(Dataset const *x, unsigned short k, Param parameters);
 
-void deleteMatrix(double** matrix, int m) {
-    for(int i = 0; i < m; i++) {
-        delete [] matrix[i];
-    }
-    delete [] matrix;
-}
-
 // Initialization and execution of K-means implementation of Greg Hamerly
 int execute(Kmeans *algorithm, Dataset const *x, unsigned short k, unsigned short *assignment, int maxIterations) {
 
@@ -182,23 +175,17 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
 }
 
 // Get the centroids assignment (perfect matching)
-double** assignment(double** c1, double** c2, int m, int d) { //O(m^2d)
-    double** matrix = new double*[m];
-
-    for(int i = 0; i < m; i++) {
-        matrix[i] = new double[m];
-    }
-
+vector< vector<double> > assignment(double** c1, double** c2, int m, int d) { //O(m^2d)
+    vector< vector<double> > matrix(m, vector<double>(m));
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < m; j++) {
             matrix[i][j] = MathUtils::squaredEuclidean(c1[i], c2[j], d);
         }
     }
-
     return matrix;
 }
 
-vector<long> minAssignment(double** mat, int m) {
+vector<long> minAssignment(vector< vector<double> > mat, int m) {
     dlib::matrix<double> cost(m,m);
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < m; j++) {
@@ -212,7 +199,6 @@ vector<long> minAssignment(double** mat, int m) {
 
 Solution* crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, double alpha) {
     int d = x->d;    
-    unsigned short* offspring = new unsigned short[x->n];
     double** c1 = p1->getCentroids();
     double** c2 = p2->getCentroids();
     double** c3 = new double* [m];
@@ -221,7 +207,7 @@ Solution* crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, d
         c3[i] = new double[d];
     }
 
-    double** matrix = assignment(c1, c2, m, d); // O(m^2 d)
+    vector< vector<double> > matrix = assignment(c1, c2, m, d); // O(m^2 d)
     vector<long> matching = minAssignment(matrix, m); // O(m^3)  Hungarian method
 
     for(int i = 0; i < m; i++) { // O(md)
@@ -238,7 +224,6 @@ Solution* crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, d
 
     Solution* off = new Solution(c3, alpha, x, m);
     off->fixSolution(x, m, alpha);
-    deleteMatrix(matrix, m);
 
     return off;
 }
@@ -451,10 +436,10 @@ Solution* mutation(Solution* off, const Dataset* x, const int m, double alpha) {
             mutated[i] = barycenter;
         }
     }
-    
+
     Solution* mutatedSolution = new Solution(mutated, alpha, x, m);
     mutatedSolution->fixSolution(x, m, alpha);
-    deleteMatrix(newcentroids, m);
+    MathUtils::deleteMatrix(newcentroids, m);
 
     return mutatedSolution;
 }
@@ -516,21 +501,21 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
             alpha = mutationAlpha(alpha);
 
         // Apply the mutation
-        Solution* mutated = mutation(offspring, x, m, alpha);
+        Solution* mutatedSolution = mutation(offspring, x, m, alpha);
         
-        unsigned short* mut = new unsigned short[n];
+        unsigned short* mutatedAssignment = new unsigned short[n];
 
-        copy(mutated->getAssignment(), mutated->getAssignment() + n, mut);
+        copy(mutatedSolution->getAssignment(), mutatedSolution->getAssignment() + n, mutatedAssignment);
 
         avgAlpha = avgAlpha + alpha;
 
         // Apply local search to the mutated solution       
-        nbIter = nbIter + execute(algorithm, x, m, mut, MathUtils::MAX_INT);
+        nbIter = nbIter + execute(algorithm, x, m, mutatedAssignment, MathUtils::MAX_INT);
 
-        delete mutated;
+        delete mutatedSolution;
 
         // Create a new solution with the local minima obtained by K-means local search
-        Solution* child = new Solution(mut, algorithm->getSSE(), alpha, x, m);
+        Solution* child = new Solution(mutatedAssignment, algorithm->getSSE(), alpha, x, m);
 
         // Add child solution to population
         population.push_back(child);

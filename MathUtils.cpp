@@ -2,7 +2,7 @@
 
 using namespace std;
 
-namespace MathUtils { 
+namespace MathUtils {
     
     int findIndex(vector<double> values, double key, int first, int last) {
         if(values[first] <= key && values[first+1] >= key) {
@@ -50,5 +50,12 @@ namespace MathUtils {
             dist = dist + ( (data[p*d+i] - center[i])*(data[p*d+i] - center[i]) );
         }
         return dist;
+    }
+
+    void deleteMatrix(double** matrix, int m) {
+        for(int i = 0; i < m; i++) {
+            delete [] matrix[i];
+        }
+        delete [] matrix;
     }
 }

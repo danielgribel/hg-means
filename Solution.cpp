@@ -1,22 +1,16 @@
 #include "Solution.h"
 
-Solution::Solution() {
-    this->assignment = NULL;
-    this->cost = 0.0;
-    this->m = 0;
-}
-
-Solution::Solution(unsigned short* assignment, double cost, double alpha, const Dataset* x, const int m) {
-    this->assignment = assignment;
-    this->cost = cost;
+Solution::Solution(unsigned short* assignment, double alpha, const Dataset* x, const int m) {
+	this->assignment = assignment;
     this->alpha = alpha;
     this->m = m;
     initCentroids(m, x->d);
     assignmentToCentroids(x, m);
 }
 
-Solution::Solution(unsigned short* assignment, double alpha, const Dataset* x, const int m) {
+Solution::Solution(unsigned short* assignment, double cost, double alpha, const Dataset* x, const int m) {
 	this->assignment = assignment;
+    this->cost = cost;
     this->alpha = alpha;
     this->m = m;
     initCentroids(m, x->d);
@@ -28,7 +22,7 @@ Solution::Solution(double** centroids, double cost, double alpha, const Dataset*
     this->cost = cost;
     this->alpha = alpha;
     this->m = m;
-    assignment = new unsigned short[x->n];
+    initAssignment(x->n);
     centroidsToAssignment(x, m);
 }
 
@@ -36,13 +30,13 @@ Solution::Solution(double** centroids, double alpha, const Dataset* x, const int
 	this->centroids = centroids;
     this->alpha = alpha;
     this->m = m;
-    assignment = new unsigned short[x->n];
+    initAssignment(x->n);
     centroidsToAssignment(x, m);
 }
 
 Solution::~Solution() {
     deleteAssignment();
-    deleteMatrix(centroids, m);
+    deleteCentroids(centroids, m);
 }
 
 void Solution::assignmentToCentroids(const Dataset* x, const int m) { // O(nd)
@@ -70,7 +64,6 @@ void Solution::assignmentToCentroids(const Dataset* x, const int m) { // O(nd)
 void Solution::centroidsToAssignment(const Dataset* x, const int m) { // O(nmd)
     double mindist;
     double dist;
-    // assignment = new unsigned short[x->n];
     for(int i = 0; i < x->n; i++) {
         mindist = MathUtils::MAX_FLOAT;
         for(int j = 0; j < m; j++) {
@@ -101,8 +94,7 @@ void Solution::fixSolution(const Dataset* x, const int m, double alpha) {
         vector<double> distToCentroid(x->n); // the distance from data points to their centroids
         double sumDist = 0.0; // sum of all distances from data points to their centroids
         vector<int> sizes(m, 0); // the size (cardinality) of clusters
-        // double** centroids = assignmentToCentroids(x, m);
-        deleteMatrix(centroids, m);
+        deleteCentroids(centroids, m);
         initCentroids(m, x->d);
         assignmentToCentroids(x, m);
         vector<double> pr(x->n);
@@ -131,11 +123,14 @@ void Solution::fixSolution(const Dataset* x, const int m, double alpha) {
                 it++;
             }
         }
-        // deleteMatrix(centroids, m);
     }
-    deleteMatrix(centroids, m);
+    deleteCentroids(centroids, m);
 	initCentroids(m, x->d);
 	assignmentToCentroids(x, m);
+}
+
+void Solution::initAssignment(int n) {
+	assignment = new unsigned short[n];
 }
 
 void Solution::initCentroids(int m, int d) {
@@ -148,9 +143,6 @@ void Solution::initCentroids(int m, int d) {
     }
 }
 
-void Solution::deleteMatrix(double** matrix, int m) {
-    for(int i = 0; i < m; i++) {
-        delete [] matrix[i];
-    }
-    delete [] matrix;
+void Solution::deleteCentroids(double** centroids, int m) {
+	MathUtils::deleteMatrix(centroids, m);
 }

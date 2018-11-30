@@ -23,6 +23,8 @@ namespace MathUtils {
     double squaredEuclidean(double* a, double* b, int d);
 
     double pcDist(int p, double* center, int d, double* data);
+
+    void deleteMatrix(double** matrix, int m);
 }
 
 #endif

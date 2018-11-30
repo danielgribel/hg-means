@@ -22,16 +22,20 @@ class Solution {
 
         int m;
 
+        void assignmentToCentroids(const Dataset* x, const int m);
+
+        void centroidsToAssignment(const Dataset* x, const int m);
+
+        void initAssignment(int n);
+
         void initCentroids(int m, int d);
 
         void deleteAssignment() { delete [] assignment; };
 
-        void deleteMatrix(double** matrix, int m);
+        void deleteCentroids(double** centroids, int m);
 
     public:
         
-        Solution();
-
         Solution(unsigned short* assignment, double cost, double alpha, const Dataset* x, const int m);
 
         Solution(double** centroids, double cost, double alpha, const Dataset* x, const int m);
@@ -49,10 +53,6 @@ class Solution {
         double getCost() { return cost; }
 
         double getAlpha() { return alpha; }
-
-        void assignmentToCentroids(const Dataset* x, const int m);
-
-        void centroidsToAssignment(const Dataset* x, const int m);
 
         void fixSolution(const Dataset* x, const int m, double alpha);
 };
