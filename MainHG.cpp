@@ -1,47 +1,11 @@
-/* Authors: Greg Hamerly and Jonathan Drake
- * Feedback: hamerly@cs.baylor.edu
- * See: http://cs.baylor.edu/~hamerly/software/kmeans.php
- * Copyright 2014
- */
-
-/* This file is a common driver for running k-means implementations.
- *
- * The program's behavior is determined by a list of commands read from
- * standard input. Input lines should take one of the following forms:
- *
- * dataset some_dataset.txt
- * initialize k [random|kpp]
- * lloyd
- * hamerly
- * elkan
- * adaptive
- * annulus
- * compare
- * sort
- *
- * There are a number of shorthand alternatives,
- * e.g. init for initialize, data for dataset
- *
- * The dataset of n floating-point values in d-dimensional space is
- * read from the indicated file name and should have the form:
- *
- * n d
- * x(1,1) x(1,2) ... x(1, d)
- * .
- * .
- * .
- * x(n,1) x(n,2) ... x(n, d)
- *
- * Results go to standard output, and some extra
- * status information is also sent to standard error.
- */
+/* */
 
 #include "hamerly/dataset.h"
 #include "hamerly/general_functions.h"
 #include "hamerly/hamerly_kmeans.h"
 #include "MinAssignment.h"
 #include "Heap.h"
-#include "HashTable.h"
+#include "Hash.h"
 #include "Param.h"
 #include "PbRun.h"
 #include "Solution.h"
@@ -446,7 +410,7 @@ int* getCardinality(int** clusterSize, int m) {
 // O(Max_Pop x n)
 vector<Solution*> selectSurvivors(vector<Solution*> population, const int sizePopulation, Dataset const *x, int m) {
     const int n = x->n;
-    HashTable* table = new HashTable();
+    Hash* table = new Hash();
     int maxPopulation = population.size();
     vector<Solution*> newPopulation;
     vector<int> discarded(maxPopulation);
@@ -458,14 +422,14 @@ vector<Solution*> selectSurvivors(vector<Solution*> population, const int sizePo
     for(unsigned short i = 0; i < maxPopulation; i++) { // O(maxPop x n)
         algorithm->initialize(x, m, population[i]->getAssignment(), 1); // O(m)
         int* card = getCardinality(algorithm->getClusterSize(), m); // O(m)
-        if(table->existItem(card, population[i]->getCost(), m)) { // check if element is in hash: O(n) worst case
+        if(table->exist(card, population[i]->getCost(), m)) { // check if element is in hash: O(n) worst case
             heapClones->push_max(population[i]->getCost(), i);
             delete [] card;
         } else {
             Item anItem;
             anItem.cost = population[i]->getCost();
             anItem.cardinality = card;
-            table->insertItem(anItem, m);
+            table->insert(anItem, m);
             heapInd->push_max(population[i]->getCost(), i);
         }
         discarded[i] = 0;
