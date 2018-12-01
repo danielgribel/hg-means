@@ -39,6 +39,8 @@ class GeneticOperations {
         
         GeneticOperations(int size_population, int max_population, int w);
 
+        ~GeneticOperations();
+
         vector<Solution*> GetPopulation() { return population; };
 
         void AddSolution(Solution* solution) { population.push_back(solution); };
@@ -57,7 +59,7 @@ class GeneticOperations {
 
         void SelectSurvivors(Dataset const *x, int m);
 
-        Solution* Crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, double alpha);
+        Solution* Crossover(Solution* p1, Solution* p2, const Dataset* x, const int m);
 };
 
 #endif

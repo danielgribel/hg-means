@@ -6,6 +6,12 @@ GeneticOperations::GeneticOperations(int size_population, int max_population, in
     this->w = w;
 }
 
+GeneticOperations::~GeneticOperations() {
+    for(unsigned short i = 0; i < population.size(); i++) {
+        DeleteSolution(i);
+    }
+}
+
 Solution* GeneticOperations::SelectParent() {
     Solution* bestSolution = NULL;
     double bestCost = MathUtils::MAX_FLOAT;
@@ -135,8 +141,9 @@ vector<long> GeneticOperations::MinAssignment(double** c1, double** c2, int m, i
     return assignment;
 }
 
-Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, double alpha) {
+Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2, const Dataset* x, const int m) {
     int d = x->d;    
+    double alpha = 0.5 * (p1->GetAlpha() + p2->GetAlpha());
     double** c1 = p1->GetCentroids();
     double** c2 = p2->GetCentroids();
     double** c3 = new double* [m];

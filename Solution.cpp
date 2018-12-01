@@ -145,14 +145,12 @@ void Solution::Mutate() {
     double dist;
     int i;
 
-    unsigned short* mutated = new unsigned short[n];
     // Randomly select one centroid to remove it from the solution
     int barycenter = rand() % m;
     double** c3 = centroids;
 
     // Keep the data points assigned to the centroid to be removed
     for(int i = 0; i < n; i++) { // O(n)
-        mutated[i] = assignment[i];
         if(assignment[i] == barycenter) {
             barycenterObj.push_back(i);
         }
@@ -167,7 +165,7 @@ void Solution::Mutate() {
                 dist = MathUtils::pcDist(i, c3[j], d, data);
                 if(dist < mindist) {
                     mindist = dist;
-                    mutated[i] = j;
+                    assignment[i] = j;
                 }    
             }
         }
@@ -175,7 +173,7 @@ void Solution::Mutate() {
 
     double sumDist = 0.0;
     for(int i = 0; i < n; i++) {
-        distCentroid[i] = MathUtils::pcDist(i, c3[mutated[i]], d, data);
+        distCentroid[i] = MathUtils::pcDist(i, c3[assignment[i]], d, data);
         sumDist = sumDist + distCentroid[i];
     }
 
@@ -210,12 +208,9 @@ void Solution::Mutate() {
     // Re-assign data points according to the solution with $m$ centroids
     for(int i = 0; i < n; i++) { // O(nd)
         if(MathUtils::pcDist(i, newcentroids[barycenter], d, data) < distCentroid[i]) {
-            mutated[i] = barycenter;
+            assignment[i] = barycenter;
         }
     }
-
-    delete [] assignment;
-    assignment = mutated;
     Repair();
     MathUtils::deleteMatrix(newcentroids, m);
 }
@@ -236,11 +231,11 @@ void Solution::DoLocalSearch(Dataset const *x) {
 
     // Check for missing initialization
     if(assignment == NULL) {
-        // cerr << "Please initialize centers first" << endl;
+        cerr << "Please initialize centers first" << endl;
         return;
     }
     if(x == NULL) {
-        // cerr << "Please load a dataset first" << endl;
+        cerr << "Please load a dataset first" << endl;
         return;
     }
 

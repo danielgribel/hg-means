@@ -5,13 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <cassert>
-#include <map>
 #include <ctime>
-#include <sys/resource.h>
-#include <unistd.h>
-#include <algorithm>
-#include <queue>
 
 using namespace std;
 
@@ -19,7 +13,7 @@ using namespace std;
 #define DATA_PATH "data/"
 #define CLASS_PATH "labels/"
 
-PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
+PbRun * ExecuteGA(Dataset const *x, unsigned short m, Param prm) {
     clock_t begin = clock();
 
     const int n = x->n;
@@ -28,7 +22,7 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
     double elapsedSecs;
     double bestCost = MathUtils::MAX_FLOAT;
     unsigned short* bestSolution = new unsigned short[n];
-    double alpha, bestAlpha;
+    double bestAlpha;
 
     // Create an instance of GeneticOperations
     GeneticOperations* genetic = new GeneticOperations(prm.sizePopulation, prm.maxPopulation, prm.W);
@@ -53,7 +47,7 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
         Solution* p2 = genetic->SelectParent();
 
         // Apply the crossover
-        Solution* current_solution = genetic->Crossover(p1, p2, x, m, 0.5 * (p1->GetAlpha() + p2->GetAlpha()));
+        Solution* current_solution = genetic->Crossover(p1, p2, x, m);
         
         // Mutate mutation factor
         if(prm.mutation) {
@@ -87,13 +81,9 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
     Solution * best = new Solution(bestSolution, bestCost, bestAlpha, x, m);
     PbRun * sol = new PbRun(best, elapsedSecs);
     
-    for(unsigned short i = 0; i < genetic->GetPopulation().size(); i++) {
-        genetic->DeleteSolution(i);
-    }
+    delete genetic;
 
     cout << m << " " << bestCost << " " << elapsedSecs << endl;
-
-    delete genetic;
 
     return sol;
 }
@@ -150,7 +140,7 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
     double ci = 0.0;
 
     for(int i = 0; i < prm.nbRuns; i++) {
-        PbRun * r = gaLoop(x, m, prm);
+        PbRun * r = ExecuteGA(x, m, prm);
 
         if(SAVE_FILE) {
             myfile.open (outfile.str().c_str(), ofstream::out | ofstream::app);  
