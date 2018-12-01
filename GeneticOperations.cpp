@@ -4,21 +4,21 @@ GeneticOperations::GeneticOperations() {
     
 }
 
-Solution* GeneticOperations::SelectParent(vector<Solution*> pop, int W) {
+Solution* GeneticOperations::SelectParent(int W) {
     Solution* bestSolution = NULL;
     double bestCost = MathUtils::MAX_FLOAT;
     unsigned short r;
     for(int i = 0; i < W; i++) {
-        r = rand() % pop.size();
-        if(pop[r]->GetCost() < bestCost) {
-            bestSolution = pop[r];
-            bestCost = pop[r]->GetCost();
+        r = rand() % population.size();
+        if(population[r]->GetCost() < bestCost) {
+            bestSolution = population[r];
+            bestCost = population[r]->GetCost();
         }
     }
     return bestSolution;
 }
 
-unsigned short* GeneticOperations::CreateKmeansSolution(const Dataset* x, unsigned short m) {
+unsigned short* GeneticOperations::GetKmeansAssignment(const Dataset* x, unsigned short m) {
     Dataset *c = NULL;
     // K-means initialization
     c = init_centers(*x, m);
@@ -28,7 +28,7 @@ unsigned short* GeneticOperations::CreateKmeansSolution(const Dataset* x, unsign
     return assignment;
 }
 
-unsigned short* GeneticOperations::CreateKppSolution(const Dataset* x, unsigned short m) {
+unsigned short* GeneticOperations::GetKppAssignment(const Dataset* x, unsigned short m) {
     Dataset *c = NULL;
     // K-means++ initialization
     c = init_centers_kmeanspp_v2(*x, m);
@@ -38,10 +38,9 @@ unsigned short* GeneticOperations::CreateKppSolution(const Dataset* x, unsigned 
     return assignment;
 }
 
-vector<Solution*> GeneticOperations::GetInitialPopulation(const Dataset* x, unsigned short m, Param prm) {
-    vector<Solution*> population;
+void GeneticOperations::CreateInitialPopulation(const Dataset* x, unsigned short m, Param prm) {
     for(int i = 0; i < prm.sizePopulation; i++) {
-        unsigned short* assignment = CreateKmeansSolution(x, m);    
+        unsigned short* assignment = GetKmeansAssignment(x, m);    
         double alpha = 1.0;
         if(prm.mutation) {
             alpha = MathUtils::fRand(0.0, 1.0);
@@ -50,7 +49,6 @@ vector<Solution*> GeneticOperations::GetInitialPopulation(const Dataset* x, unsi
         s->DoLocalSearch(x);
         population.push_back(s);
     }
-    return population;
 }
 
 int* GeneticOperations::GetCardinality(int** clusterSize, int m) {
@@ -62,7 +60,7 @@ int* GeneticOperations::GetCardinality(int** clusterSize, int m) {
 }
 
 // O(Max_Pop x n)
-vector<Solution*> GeneticOperations::SelectSurvivors(vector<Solution*> population, const int sizePopulation, Dataset const *x, int m) {
+void GeneticOperations::SelectSurvivors(const int sizePopulation, Dataset const *x, int m) {
     const int n = x->n;
     Hash* table = new Hash();
     int maxPopulation = population.size();
@@ -120,7 +118,7 @@ vector<Solution*> GeneticOperations::SelectSurvivors(vector<Solution*> populatio
     delete heapClones;
     delete table;
 
-    return newPopulation;
+    population = newPopulation;
 }
 
 // Get the centroids assignment (perfect matching)

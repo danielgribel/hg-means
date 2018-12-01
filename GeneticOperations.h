@@ -19,22 +19,35 @@ class GeneticOperations {
     
     private:
 
+        vector<Solution*> population;
         
     public:
         
         GeneticOperations();
 
-        Solution* SelectParent(vector<Solution*> pop, int W);
+        vector<Solution*> GetPopulation() { return population; };
 
-        unsigned short* CreateKmeansSolution(const Dataset* x, unsigned short m);
+        void AddSolution(Solution* solution) { population.push_back(solution); };
 
-        unsigned short* CreateKppSolution(const Dataset* x, unsigned short m);
+        void DeleteSolution(int i) { delete population[i]; };
 
-        vector<Solution*> GetInitialPopulation(const Dataset* x, unsigned short m, Param prm);
+        double GetCost(int i) { return population[i]->GetCost(); }
+
+        double GetAlpha(int i) { return population[i]->GetAlpha(); }
+
+        unsigned short* GetAssignment(int i) { return population[i]->GetAssignment(); }
+
+        Solution* SelectParent(int W);
+
+        unsigned short* GetKmeansAssignment(const Dataset* x, unsigned short m);
+
+        unsigned short* GetKppAssignment(const Dataset* x, unsigned short m);
+
+        void CreateInitialPopulation(const Dataset* x, unsigned short m, Param prm);
 
         int* GetCardinality(int** clusterSize, int m);
         
-        vector<Solution*> SelectSurvivors(vector<Solution*> population, const int sizePopulation, Dataset const *x, int m);
+        void SelectSurvivors(const int sizePopulation, Dataset const *x, int m);
 
         vector<long> MinAssignment(double** c1, double** c2, int m, int d);
 
