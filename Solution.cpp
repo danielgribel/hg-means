@@ -1,47 +1,35 @@
 #include "Solution.h"
 
-Solution::Solution(unsigned short* assignment, double alpha, const Dataset* x, const int m) {
+Solution::Solution(unsigned short* assignment, double alpha, PbData pb_data) {
 	this->assignment = assignment;
     this->alpha = alpha;
-    this->data = x->data;
-    this->n = x->n;
-    this->d = x->d;
-    this->m = m;
+    this->pb_data = pb_data;
     InitCentroids();
     AssignmentToCentroids();
 }
 
-Solution::Solution(unsigned short* assignment, double cost, double alpha, const Dataset* x, const int m) {
+Solution::Solution(unsigned short* assignment, double cost, double alpha, PbData pb_data) {
 	this->assignment = assignment;
     this->cost = cost;
     this->alpha = alpha;
-    this->data = x->data;
-    this->n = x->n;
-    this->d = x->d;
-    this->m = m;
+    this->pb_data = pb_data;
     InitCentroids();
     AssignmentToCentroids();
 }
 
-Solution::Solution(double** centroids, double cost, double alpha, const Dataset* x, const int m) {
+Solution::Solution(double** centroids, double cost, double alpha, PbData pb_data) {
 	this->centroids = centroids;
     this->cost = cost;
     this->alpha = alpha;
-    this->data = x->data;
-    this->n = x->n;
-    this->d = x->d;
-    this->m = m;
+    this->pb_data = pb_data;
     InitAssignment();
     CentroidsToAssignment();
 }
 
-Solution::Solution(double** centroids, double alpha, const Dataset* x, const int m) {
+Solution::Solution(double** centroids, double alpha, PbData pb_data) {
 	this->centroids = centroids;
     this->alpha = alpha;
-    this->data = x->data;
-    this->n = x->n;
-    this->d = x->d;
-    this->m = m;
+    this->pb_data = pb_data;
     InitAssignment();
     CentroidsToAssignment();
 }
@@ -52,6 +40,11 @@ Solution::~Solution() {
 }
 
 void Solution::AssignmentToCentroids() { // O(nd)
+    int n = pb_data.GetN();
+    int d = pb_data.GetD();
+    int m = pb_data.GetM();
+    double* data = pb_data.GetData();
+
     vector<int> sizes(m,0);
     for(int i = 0; i < n; i++) {
         sizes[assignment[i]] = sizes[assignment[i]]+1;
@@ -69,6 +62,10 @@ void Solution::AssignmentToCentroids() { // O(nd)
 }
 
 void Solution::CentroidsToAssignment() { // O(nmd)
+    int n = pb_data.GetN();
+    int d = pb_data.GetD();
+    int m = pb_data.GetM();
+    double* data = pb_data.GetData();
     double mindist;
     double dist;
     for(int i = 0; i < n; i++) {
@@ -84,6 +81,11 @@ void Solution::CentroidsToAssignment() { // O(nmd)
 }
 
 void Solution::Repair() {
+    int n = pb_data.GetN();
+    int d = pb_data.GetD();
+    int m = pb_data.GetM();
+    double* data = pb_data.GetData();
+
     vector<bool> populated(m, false); // the (boolean) list of empty clusters 
     vector<int> listEmpty; // the list of empty clusters
     
@@ -137,6 +139,10 @@ void Solution::Repair() {
 }
 
 void Solution::Mutate() {
+    int n = pb_data.GetN();
+    int d = pb_data.GetD();
+    int m = pb_data.GetM();
+    double* data = pb_data.GetData();
     vector<double> distCentroid(n);
     vector<double> pr (n);
     vector<int> barycenterObj;
@@ -226,6 +232,7 @@ void Solution::MutateAlpha() {
 }
 
 void Solution::DoLocalSearch(Dataset const *x) {
+    int m = pb_data.GetM();
     Kmeans *algorithm = new HamerlyKmeans();
     int numThreads = 1;
 
@@ -250,10 +257,12 @@ void Solution::DoLocalSearch(Dataset const *x) {
 }
 
 void Solution::InitAssignment() {
-	assignment = new unsigned short[n];
+	assignment = new unsigned short[pb_data.GetN()];
 }
 
 void Solution::InitCentroids() {
+    int d = pb_data.GetD();
+    int m = pb_data.GetM();
 	centroids = new double*[m];
     for(int i = 0; i < m; i++) {
         centroids[i] = new double[d];
@@ -264,5 +273,5 @@ void Solution::InitCentroids() {
 }
 
 void Solution::DeleteCentroids() {
-	MathUtils::deleteMatrix(centroids, m);
+	MathUtils::deleteMatrix(centroids, pb_data.GetM());
 }

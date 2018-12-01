@@ -13,10 +13,11 @@ using namespace std;
 #define DATA_PATH "data/"
 #define CLASS_PATH "labels/"
 
-PbRun * ExecuteGA(Dataset const *x, unsigned short m, Param prm) {
+PbRun * ExecuteGA(Dataset const *x, PbData pb_data, Param prm) {
     clock_t begin = clock();
 
-    const int n = x->n;
+    const int n = pb_data.GetN();
+    const int m = pb_data.GetM();
     int it = 0;
     int lastImprovement = 0;
     double elapsedSecs;
@@ -25,10 +26,10 @@ PbRun * ExecuteGA(Dataset const *x, unsigned short m, Param prm) {
     double bestAlpha;
 
     // Create an instance of GeneticOperations
-    GeneticOperations* genetic = new GeneticOperations(prm.sizePopulation, prm.maxPopulation, prm.W);
+    GeneticOperations* genetic = new GeneticOperations(pb_data, prm.sizePopulation, prm.maxPopulation, prm.W);
 
     // Generate the initial population
-    genetic->CreateInitialPopulation(x, m, prm.mutation);
+    genetic->CreateInitialPopulation(x, prm.mutation);
 
     // Store the best solution
     for(unsigned short i = 0; i < genetic->GetPopulation().size(); i++) {
@@ -47,7 +48,7 @@ PbRun * ExecuteGA(Dataset const *x, unsigned short m, Param prm) {
         Solution* p2 = genetic->SelectParent();
 
         // Apply the crossover
-        Solution* current_solution = genetic->Crossover(p1, p2, x, m);
+        Solution* current_solution = genetic->Crossover(p1, p2);
         
         // Mutate mutation factor
         if(prm.mutation) {
@@ -73,12 +74,12 @@ PbRun * ExecuteGA(Dataset const *x, unsigned short m, Param prm) {
 
         // Select the survivors
         if(genetic->GetPopulation().size() > prm.maxPopulation) {
-            genetic->SelectSurvivors(x, m);
+            genetic->SelectSurvivors(x);
         }
         it++;
     }
     elapsedSecs = double(clock() - begin) / CLOCKS_PER_SEC;
-    Solution * best = new Solution(bestSolution, bestCost, bestAlpha, x, m);
+    Solution * best = new Solution(bestSolution, bestCost, bestAlpha, pb_data);
     PbRun * sol = new PbRun(best, elapsedSecs);
     
     delete genetic;
@@ -117,6 +118,9 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
         return;
     }
 
+    // Create an instance of PbData
+    PbData pb_data(x->data, x->n, x->d, m);
+
     ofstream myfile;
     stringstream outfile;
 
@@ -140,7 +144,7 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
     double ci = 0.0;
 
     for(int i = 0; i < prm.nbRuns; i++) {
-        PbRun * r = ExecuteGA(x, m, prm);
+        PbRun * r = ExecuteGA(x, pb_data, prm);
 
         if(SAVE_FILE) {
             myfile.open (outfile.str().c_str(), ofstream::out | ofstream::app);  
@@ -183,7 +187,7 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
                 return;
             } else {
                 Solution* y_pred = r->GetSolution();
-                Solution* y_ = new Solution(y, 0.0, x, m);
+                Solution* y_ = new Solution(y, 0.0, pb_data);
                 Evaluator * eval = new Evaluator(n, m, d,
                     y_pred->GetAssignment(), y, y_pred->GetCentroids(), y_->GetCentroids());                
                 crand = eval->cRand();

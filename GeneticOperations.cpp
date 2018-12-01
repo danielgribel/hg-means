@@ -1,6 +1,7 @@
 #include "GeneticOperations.h"
 
-GeneticOperations::GeneticOperations(int size_population, int max_population, int w) {
+GeneticOperations::GeneticOperations(PbData pb_data, int size_population, int max_population, int w) {
+    this->pb_data = pb_data;
     this->size_population = size_population;
     this->max_population = max_population;
     this->w = w;
@@ -26,50 +27,51 @@ Solution* GeneticOperations::SelectParent() {
     return bestSolution;
 }
 
-unsigned short* GeneticOperations::GetKmeansAssignment(const Dataset* x, unsigned short m) {
+unsigned short* GeneticOperations::GetKmeansAssignment(const Dataset* x) {
     Dataset *c = NULL;
     // K-means initialization
-    c = init_centers(*x, m);
+    c = init_centers(*x, pb_data.GetM());
     unsigned short* assignment = new unsigned short[x->n];
     assign(*x, *c, assignment);
     delete c;
     return assignment;
 }
 
-unsigned short* GeneticOperations::GetKppAssignment(const Dataset* x, unsigned short m) {
+unsigned short* GeneticOperations::GetKppAssignment(const Dataset* x) {
     Dataset *c = NULL;
     // K-means++ initialization
-    c = init_centers_kmeanspp_v2(*x, m);
+    c = init_centers_kmeanspp_v2(*x, pb_data.GetM());
     unsigned short* assignment = new unsigned short[x->n];
     assign(*x, *c, assignment);
     delete c;
     return assignment;
 }
 
-void GeneticOperations::CreateInitialPopulation(const Dataset* x, unsigned short m, bool is_mutable) {
+void GeneticOperations::CreateInitialPopulation(const Dataset* x, bool is_mutable) {
     for(int i = 0; i < size_population; i++) {
-        unsigned short* assignment = GetKmeansAssignment(x, m);    
+        unsigned short* assignment = GetKmeansAssignment(x);    
         double alpha = 1.0;
         if(is_mutable) {
             alpha = MathUtils::fRand(0.0, 1.0);
         }
-        Solution* s = new Solution(assignment, alpha, x, m);
+        Solution* s = new Solution(assignment, alpha, pb_data);
         s->DoLocalSearch(x);
         AddSolution(s);
     }
 }
 
-int* GeneticOperations::GetCardinality(int** clusterSize, int m) {
-    int* cardinality = new int[m];
-    for(int i = 0; i < m; i++) {
+int* GeneticOperations::GetCardinality(int** clusterSize) {
+    int* cardinality = new int[pb_data.GetM()];
+    for(int i = 0; i < pb_data.GetM(); i++) {
         cardinality[i] = clusterSize[0][i];
     }
     return cardinality;
 }
 
 // O(Max_Pop x n)
-void GeneticOperations::SelectSurvivors(Dataset const *x, int m) {
-    const int n = x->n;
+void GeneticOperations::SelectSurvivors(const Dataset* x) {
+    int n = pb_data.GetN();
+    int m = pb_data.GetM();
     Hash* table = new Hash();
     int maxPopulation = population.size();
     vector<Solution*> newPopulation;
@@ -81,7 +83,7 @@ void GeneticOperations::SelectSurvivors(Dataset const *x, int m) {
 
     for(unsigned short i = 0; i < maxPopulation; i++) { // O(maxPop x n)
         algorithm->initialize(x, m, GetAssignment(i), 1); // O(m)
-        int* card = GetCardinality(algorithm->getClusterSize(), m); // O(m)
+        int* card = GetCardinality(algorithm->getClusterSize()); // O(m)
         // Check if element is in hash: O(n) worst case
         if(table->exist(card, GetCost(i), m)) {
             heapClones->push_max(GetCost(i), i);
@@ -130,7 +132,9 @@ void GeneticOperations::SelectSurvivors(Dataset const *x, int m) {
 }
 
 // Get the centroids assignment (perfect matching)
-vector<long> GeneticOperations::MinAssignment(double** c1, double** c2, int m, int d) { //O(m^2d)
+vector<long> GeneticOperations::MinAssignment(double** c1, double** c2) { //O(m^2d)
+    int m = pb_data.GetM();
+    int d = pb_data.GetD();
     dlib::matrix<double> cost(m,m);
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < m; j++) {
@@ -141,8 +145,10 @@ vector<long> GeneticOperations::MinAssignment(double** c1, double** c2, int m, i
     return assignment;
 }
 
-Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2, const Dataset* x, const int m) {
-    int d = x->d;    
+Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2) {
+    int n = pb_data.GetN();
+    int d = pb_data.GetD();
+    int m = pb_data.GetM();
     double alpha = 0.5 * (p1->GetAlpha() + p2->GetAlpha());
     double** c1 = p1->GetCentroids();
     double** c2 = p2->GetCentroids();
@@ -152,7 +158,7 @@ Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2, const Dataset
         c3[i] = new double[d];
     }
 
-    vector<long> matching = MinAssignment(c1, c2, m, d); // O(m^3)  Hungarian method
+    vector<long> matching = MinAssignment(c1, c2); // O(m^3)  Hungarian method
 
     for(int i = 0; i < m; i++) { // O(md)
         if((rand() % 2) == 0) {
@@ -166,7 +172,7 @@ Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2, const Dataset
         }
     }
 
-    Solution* off = new Solution(c3, alpha, x, m);
+    Solution* off = new Solution(c3, alpha, pb_data);
     off->Repair();
 
     return off;

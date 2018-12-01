@@ -6,6 +6,7 @@
 #include "hamerly/dataset.h"
 #include "hamerly/hamerly_kmeans.h"
 #include "MathUtils.h"
+#include "PbData.h"
 
 #define MUTATION_RATE 0.2
 
@@ -23,13 +24,7 @@ class Solution {
 
         double alpha;
 
-        double* data;
-
-        int n;
-
-        int d;
-
-        int m;
+        PbData pb_data;
 
         void AssignmentToCentroids();
 
@@ -45,13 +40,13 @@ class Solution {
 
     public:
         
-        Solution(unsigned short* assignment, double cost, double alpha, const Dataset* x, const int m);
+        Solution(unsigned short* assignment, double cost, double alpha, PbData pb_data);
 
-        Solution(double** centroids, double cost, double alpha, const Dataset* x, const int m);
+        Solution(double** centroids, double cost, double alpha, PbData pb_data);
 
-        Solution(unsigned short* assignment, double alpha, const Dataset* x, const int m);
+        Solution(unsigned short* assignment, double alpha, PbData pb_data);
 
-        Solution(double** centroids, double alpha, const Dataset* x, const int m);
+        Solution(double** centroids, double alpha, PbData pb_data);
 
         ~Solution();
 

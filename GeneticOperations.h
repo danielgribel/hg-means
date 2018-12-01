@@ -6,6 +6,7 @@
 #include "hamerly/dataset.h"
 #include "hamerly/kmeans.h"
 #include "hamerly/general_functions.h"
+#include "PbData.h"
 #include "Solution.h"
 #include "MathUtils.h"
 #include "Param.h"
@@ -21,23 +22,25 @@ class GeneticOperations {
 
         vector<Solution*> population;
 
+        PbData pb_data;
+
         int size_population;
 
         int max_population;
 
         int w;
 
-        vector<long> MinAssignment(double** c1, double** c2, int m, int d);
+        vector<long> MinAssignment(double** c1, double** c2);
         
-        unsigned short* GetKmeansAssignment(const Dataset* x, unsigned short m);
+        unsigned short* GetKmeansAssignment(const Dataset* x);
 
-        unsigned short* GetKppAssignment(const Dataset* x, unsigned short m);
+        unsigned short* GetKppAssignment(const Dataset* x);
 
-        int* GetCardinality(int** clusterSize, int m);
+        int* GetCardinality(int** clusterSize);
 
     public:
         
-        GeneticOperations(int size_population, int max_population, int w);
+        GeneticOperations(PbData pb_data, int size_population, int max_population, int w);
 
         ~GeneticOperations();
 
@@ -55,11 +58,11 @@ class GeneticOperations {
 
         Solution* SelectParent();
 
-        void CreateInitialPopulation(const Dataset* x, unsigned short m, bool is_mutable);
+        void CreateInitialPopulation(const Dataset* x, bool is_mutable);
 
-        void SelectSurvivors(Dataset const *x, int m);
+        void SelectSurvivors(const Dataset* x);
 
-        Solution* Crossover(Solution* p1, Solution* p2, const Dataset* x, const int m);
+        Solution* Crossover(Solution* p1, Solution* p2);
 };
 
 #endif
