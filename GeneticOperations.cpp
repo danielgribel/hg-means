@@ -12,9 +12,9 @@ Solution* GeneticOperations::SelectParent() {
     unsigned short r;
     for(int i = 0; i < w; i++) {
         r = rand() % population.size();
-        if(population[r]->GetCost() < bestCost) {
+        if(GetCost(r) < bestCost) {
             bestSolution = population[r];
-            bestCost = population[r]->GetCost();
+            bestCost = GetCost(r);
         }
     }
     return bestSolution;
@@ -49,7 +49,7 @@ void GeneticOperations::CreateInitialPopulation(const Dataset* x, unsigned short
         }
         Solution* s = new Solution(assignment, alpha, x, m);
         s->DoLocalSearch(x);
-        population.push_back(s);
+        AddSolution(s);
     }
 }
 
@@ -74,18 +74,18 @@ void GeneticOperations::SelectSurvivors(Dataset const *x, int m) {
     Kmeans* algorithm = new HamerlyKmeans();
 
     for(unsigned short i = 0; i < maxPopulation; i++) { // O(maxPop x n)
-        algorithm->initialize(x, m, population[i]->GetAssignment(), 1); // O(m)
+        algorithm->initialize(x, m, GetAssignment(i), 1); // O(m)
         int* card = GetCardinality(algorithm->getClusterSize(), m); // O(m)
         // Check if element is in hash: O(n) worst case
-        if(table->exist(card, population[i]->GetCost(), m)) {
-            heapClones->push_max(population[i]->GetCost(), i);
+        if(table->exist(card, GetCost(i), m)) {
+            heapClones->push_max(GetCost(i), i);
             delete [] card;
         } else {
             Item anItem;
-            anItem.cost = population[i]->GetCost();
+            anItem.cost = GetCost(i);
             anItem.cardinality = card;
             table->insert(anItem, m);
-            heapInd->push_max(population[i]->GetCost(), i);
+            heapInd->push_max(GetCost(i), i);
         }
         discarded[i] = 0;
     }
@@ -101,7 +101,7 @@ void GeneticOperations::SelectSurvivors(Dataset const *x, int m) {
         j++;
     }
 
-    while(j < (maxPopulation-size_population)) {
+    while(j < (maxPopulation - size_population)) {
         id = heapInd->front_max().second;
         heapInd->pop_max();
         discarded[id] = 1;
