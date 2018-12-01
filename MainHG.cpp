@@ -83,12 +83,9 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
         }
         it++;
     }
-
     elapsedSecs = double(clock() - begin) / CLOCKS_PER_SEC;
-    nbIter = 1.0*nbIter/it;
-
     Solution * best = new Solution(bestSolution, bestCost, bestAlpha, x, m);
-    PbRun * sol = new PbRun(best, elapsedSecs, lastImprovement, nbIter, 0.0, 1);
+    PbRun * sol = new PbRun(best, elapsedSecs);
     
     for(unsigned short i = 0; i < population.size(); i++) {
         delete population[i];
@@ -161,8 +158,8 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
             myfile << prm.maxIt << " ";
             myfile << fileData << " ";
             myfile << m << " ";
-            myfile << fixed << setprecision(10) << r->getSolution()->GetCost() << " ";
-            myfile << fixed << setprecision(4) << r->getTime() << " ";
+            myfile << fixed << setprecision(10) << r->GetSolution()->GetCost() << " ";
+            myfile << fixed << setprecision(4) << r->GetTime() << " ";
         }
 
         if(prm.eval) {
@@ -195,7 +192,7 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
                 }
                 return;
             } else {
-                Solution* y_pred = r->getSolution();
+                Solution* y_pred = r->GetSolution();
                 Solution* y_ = new Solution(y, 0.0, x, m);
                 Evaluator * eval = new Evaluator(n, m, d,
                     y_pred->GetAssignment(), y, y_pred->GetCentroids(), y_->GetCentroids());                
@@ -216,7 +213,7 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
             myfile << "\n";
             myfile.close();
         }
-        delete r->getSolution();
+        delete r->GetSolution();
         delete r;
     }
 

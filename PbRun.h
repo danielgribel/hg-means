@@ -11,35 +11,18 @@ class PbRun {
         Solution* solution;
 
         double time;
-
-        int lastImprovement;
-
-        double nbIter;
-
-        double avgAlpha;
-
-        bool isValid;
     
     public:
         
         PbRun();
 
-        PbRun(Solution* solution, double time, int lastImprovement, double nbIter, double avgAlpha, bool isValid);
+        PbRun(Solution* solution, double time);
 
         ~PbRun();
 
-        Solution* getSolution() { return solution; };
+        Solution* GetSolution() { return solution; };
 
-        double getTime() { return time; }
-
-        int getLastImprovement() { return lastImprovement; }
-
-        double getNbIter() { return nbIter; }
-
-        double getAvgAlpha() { return avgAlpha; }
-
-        bool getIsValid() { return isValid; }
-
+        double GetTime() { return time; }
 };
 
 #endif
