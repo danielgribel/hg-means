@@ -1,14 +1,16 @@
 #include "GeneticOperations.h"
 
-GeneticOperations::GeneticOperations() {
-    
+GeneticOperations::GeneticOperations(int size_population, int max_population, int w) {
+    this->size_population = size_population;
+    this->max_population = max_population;
+    this->w = w;
 }
 
-Solution* GeneticOperations::SelectParent(int W) {
+Solution* GeneticOperations::SelectParent() {
     Solution* bestSolution = NULL;
     double bestCost = MathUtils::MAX_FLOAT;
     unsigned short r;
-    for(int i = 0; i < W; i++) {
+    for(int i = 0; i < w; i++) {
         r = rand() % population.size();
         if(population[r]->GetCost() < bestCost) {
             bestSolution = population[r];
@@ -38,11 +40,11 @@ unsigned short* GeneticOperations::GetKppAssignment(const Dataset* x, unsigned s
     return assignment;
 }
 
-void GeneticOperations::CreateInitialPopulation(const Dataset* x, unsigned short m, Param prm) {
-    for(int i = 0; i < prm.sizePopulation; i++) {
+void GeneticOperations::CreateInitialPopulation(const Dataset* x, unsigned short m, bool is_mutable) {
+    for(int i = 0; i < size_population; i++) {
         unsigned short* assignment = GetKmeansAssignment(x, m);    
         double alpha = 1.0;
-        if(prm.mutation) {
+        if(is_mutable) {
             alpha = MathUtils::fRand(0.0, 1.0);
         }
         Solution* s = new Solution(assignment, alpha, x, m);
@@ -60,7 +62,7 @@ int* GeneticOperations::GetCardinality(int** clusterSize, int m) {
 }
 
 // O(Max_Pop x n)
-void GeneticOperations::SelectSurvivors(const int sizePopulation, Dataset const *x, int m) {
+void GeneticOperations::SelectSurvivors(Dataset const *x, int m) {
     const int n = x->n;
     Hash* table = new Hash();
     int maxPopulation = population.size();
@@ -92,14 +94,14 @@ void GeneticOperations::SelectSurvivors(const int sizePopulation, Dataset const 
     int j = 0;
     
     // For the two whiles: O(maxPop - sizePop)
-    while((j < (maxPopulation-sizePopulation)) && (heapClones->getHeap().size() > 0)) {
+    while((j < (maxPopulation-size_population)) && (heapClones->getHeap().size() > 0)) {
         id = heapClones->front_max().second;
         heapClones->pop_max();
         discarded[id] = 1;
         j++;
     }
 
-    while(j < (maxPopulation-sizePopulation)) {
+    while(j < (maxPopulation-size_population)) {
         id = heapInd->front_max().second;
         heapInd->pop_max();
         discarded[id] = 1;

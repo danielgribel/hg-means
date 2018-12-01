@@ -20,10 +20,24 @@ class GeneticOperations {
     private:
 
         vector<Solution*> population;
+
+        int size_population;
+
+        int max_population;
+
+        int w;
+
+        vector<long> MinAssignment(double** c1, double** c2, int m, int d);
         
+        unsigned short* GetKmeansAssignment(const Dataset* x, unsigned short m);
+
+        unsigned short* GetKppAssignment(const Dataset* x, unsigned short m);
+
+        int* GetCardinality(int** clusterSize, int m);
+
     public:
         
-        GeneticOperations();
+        GeneticOperations(int size_population, int max_population, int w);
 
         vector<Solution*> GetPopulation() { return population; };
 
@@ -37,19 +51,11 @@ class GeneticOperations {
 
         unsigned short* GetAssignment(int i) { return population[i]->GetAssignment(); }
 
-        Solution* SelectParent(int W);
+        Solution* SelectParent();
 
-        unsigned short* GetKmeansAssignment(const Dataset* x, unsigned short m);
+        void CreateInitialPopulation(const Dataset* x, unsigned short m, bool is_mutable);
 
-        unsigned short* GetKppAssignment(const Dataset* x, unsigned short m);
-
-        void CreateInitialPopulation(const Dataset* x, unsigned short m, Param prm);
-
-        int* GetCardinality(int** clusterSize, int m);
-        
-        void SelectSurvivors(const int sizePopulation, Dataset const *x, int m);
-
-        vector<long> MinAssignment(double** c1, double** c2, int m, int d);
+        void SelectSurvivors(Dataset const *x, int m);
 
         Solution* Crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, double alpha);
 };

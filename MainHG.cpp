@@ -26,15 +26,15 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
     int it = 0;
     int lastImprovement = 0;
     double elapsedSecs;
-    double nbIter = 0.0;
     double bestCost = MathUtils::MAX_FLOAT;
     unsigned short* bestSolution = new unsigned short[n];
     double alpha, bestAlpha;
 
-    GeneticOperations* genetic = new GeneticOperations();
+    // Create an instance of GeneticOperations
+    GeneticOperations* genetic = new GeneticOperations(prm.sizePopulation, prm.maxPopulation, prm.W);
 
     // Generate the initial population
-    genetic->CreateInitialPopulation(x, m, prm);
+    genetic->CreateInitialPopulation(x, m, prm.mutation);
 
     // Store the best solution
     for(unsigned short i = 0; i < genetic->GetPopulation().size(); i++) {
@@ -49,8 +49,8 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
 	while(((it-lastImprovement) < prm.itNoImprovement) && (it < prm.maxIt)) {
 
         // Select parent solutions for mate
-        Solution* p1 = genetic->SelectParent(prm.W);
-        Solution* p2 = genetic->SelectParent(prm.W);
+        Solution* p1 = genetic->SelectParent();
+        Solution* p2 = genetic->SelectParent();
 
         // Apply the crossover
         Solution* current_solution = genetic->Crossover(p1, p2, x, m, 0.5 * (p1->GetAlpha() + p2->GetAlpha()));
@@ -79,7 +79,7 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
 
         // Select the survivors
         if(genetic->GetPopulation().size() > prm.maxPopulation) {
-            genetic->SelectSurvivors(prm.sizePopulation, x, m);
+            genetic->SelectSurvivors(x, m);
         }
         it++;
     }
