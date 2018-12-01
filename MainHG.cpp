@@ -30,28 +30,6 @@ using namespace std;
 
 PbRun * gaLoop(Dataset const *x, unsigned short k, Param parameters);
 
-// Initialization and execution of K-means implementation of Greg Hamerly
-int execute(Kmeans *algorithm, Dataset const *x, unsigned short k, unsigned short *assignment, int maxIterations) {
-
-    int numThreads = 1;
-
-    // Check for missing initialization
-    if(assignment == NULL) {
-        cerr << "Please initialize centers first" << endl;
-        return 0;
-    }
-    if(x == NULL) {
-        cerr << "Please load a dataset first" << endl;
-        return 0;
-    }
-
-    // Time the execution and get the number of iterations
-    algorithm->initialize(x, k, assignment, numThreads);
-    int numIt = algorithm->run(maxIterations);
-
-    return numIt;
-}
-
 void demo(int seed, string fileData, Param prm, unsigned short m) {
     srand(seed);
 
@@ -112,7 +90,7 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
             myfile << prm.maxIt << " ";
             myfile << fileData << " ";
             myfile << m << " ";
-            myfile << fixed << setprecision(10) << r->getSolution()->getCost() << " ";
+            myfile << fixed << setprecision(10) << r->getSolution()->GetCost() << " ";
             myfile << fixed << setprecision(4) << r->getTime() << " ";
         }
 
@@ -149,7 +127,7 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
                 Solution* y_pred = r->getSolution();
                 Solution* y_ = new Solution(y, 0.0, x, m);
                 Evaluator * eval = new Evaluator(n, m, d,
-                    y_pred->getAssignment(), y, y_pred->getCentroids(), y_->getCentroids());                
+                    y_pred->GetAssignment(), y, y_pred->GetCentroids(), y_->GetCentroids());                
                 crand = eval->cRand();
                 nmi = eval->nmi();
                 ci = eval->centroidIndex();
@@ -188,15 +166,14 @@ vector<long> minAssignment(double** c1, double** c2, int m, int d) { //O(m^2d)
 
 Solution* crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, double alpha) {
     int d = x->d;    
-    double** c1 = p1->getCentroids();
-    double** c2 = p2->getCentroids();
+    double** c1 = p1->GetCentroids();
+    double** c2 = p2->GetCentroids();
     double** c3 = new double* [m];
     
     for(int i = 0; i < m; i++) {
         c3[i] = new double[d];
     }
 
-    // vector< vector<double> > matrix = assignment(c1, c2, m, d); // O(m^2 d)
     vector<long> matching = minAssignment(c1, c2, m, d); // O(m^3)  Hungarian method
 
     for(int i = 0; i < m; i++) { // O(md)
@@ -212,7 +189,7 @@ Solution* crossover(Solution* p1, Solution* p2, const Dataset* x, const int m, d
     }
 
     Solution* off = new Solution(c3, alpha, x, m);
-    off->fixSolution(x, m, alpha);
+    off->Repair();
 
     return off;
 }
@@ -243,21 +220,16 @@ unsigned short* getKppSolution(const Dataset* x, unsigned short m) {
 
 vector<Solution*> getInitialPopulation(const Dataset* x, unsigned short m, Param prm) {
     vector<Solution*> population;
-    int numIt;
-    Kmeans* algorithm = new HamerlyKmeans();
-
     for(int i = 0; i < prm.sizePopulation; i++) {
         unsigned short* assignment = getKmeansSolution(x, m);    
-        numIt = execute(algorithm, x, m, assignment, MathUtils::MAX_INT);
         double alpha = 1.0;
         if(prm.mutation) {
             alpha = MathUtils::fRand(0.0, 1.0);
         }
-        Solution* s = new Solution(assignment, algorithm->getSSE(), alpha, x, m);
+        Solution* s = new Solution(assignment, alpha, x, m);
+        s->DoLocalSearch(x);
         population.push_back(s);
     }
-    delete algorithm;
-
     return population;
 }
 
@@ -268,9 +240,9 @@ Solution* tournamentSelection(vector<Solution*> pop, int W) {
 
     for(int i = 0; i < W; i++) {
         r = rand() % pop.size();
-        if(pop[r]->getCost() < bestCost) {
+        if(pop[r]->GetCost() < bestCost) {
             bestSolution = pop[r];
-            bestCost = pop[r]->getCost();
+            bestCost = pop[r]->GetCost();
         }
     }
 
@@ -298,18 +270,18 @@ vector<Solution*> selectSurvivors(vector<Solution*> population, const int sizePo
     Kmeans* algorithm = new HamerlyKmeans();
 
     for(unsigned short i = 0; i < maxPopulation; i++) { // O(maxPop x n)
-        algorithm->initialize(x, m, population[i]->getAssignment(), 1); // O(m)
+        algorithm->initialize(x, m, population[i]->GetAssignment(), 1); // O(m)
         int* card = getCardinality(algorithm->getClusterSize(), m); // O(m)
         // Check if element is in hash: O(n) worst case
-        if(table->exist(card, population[i]->getCost(), m)) {
-            heapClones->push_max(population[i]->getCost(), i);
+        if(table->exist(card, population[i]->GetCost(), m)) {
+            heapClones->push_max(population[i]->GetCost(), i);
             delete [] card;
         } else {
             Item anItem;
-            anItem.cost = population[i]->getCost();
+            anItem.cost = population[i]->GetCost();
             anItem.cardinality = card;
             table->insert(anItem, m);
-            heapInd->push_max(population[i]->getCost(), i);
+            heapInd->push_max(population[i]->GetCost(), i);
         }
         discarded[i] = 0;
     }
@@ -347,103 +319,6 @@ vector<Solution*> selectSurvivors(vector<Solution*> population, const int sizePo
     return newPopulation;
 }
 
-Solution* mutation(Solution* off, const Dataset* x, const int m, double alpha) {
-    vector<double> distCentroid(x->n);
-    vector<double> pr (x->n);
-    vector<int> barycenterObj;
-    double** newcentroids = new double* [m];
-    double mindist;
-    double dist;
-    int i;
-
-    unsigned short* offspring = off->getAssignment();
-    unsigned short* mutated = new unsigned short[x->n];
-    // Randomly select one centroid to remove it from the solution
-    int barycenter = rand() % m;
-    double** c3 = off->getCentroids();
-
-    // Keep the data points assigned to the centroid to be removed
-    for(int i = 0; i < x->n; i++) { // O(n)
-        mutated[i] = offspring[i];
-        if(offspring[i] == barycenter) {
-            barycenterObj.push_back(i);
-        }
-    }
-
-    // Re-assign data points to the closest remaining centroid
-    for(int q = 0; q < barycenterObj.size(); q++) { // O(|c|md)
-        i = barycenterObj[q];
-        mindist = MathUtils::MAX_FLOAT;
-        for(int j = 0; j < m; j++) {
-            if(j != barycenter) {
-                dist = MathUtils::pcDist(i, c3[j], x->d, x->data);
-                if(dist < mindist) {
-                    mindist = dist;
-                    mutated[i] = j;
-                }    
-            }
-        }
-    }
-
-    double sumDist = 0.0;
-    for(int i = 0; i < x->n; i++) {
-        distCentroid[i] = MathUtils::pcDist(i, c3[mutated[i]], x->d, x->data);
-        sumDist = sumDist + distCentroid[i];
-    }
-
-    // Get the cumulative distance from each data point $i$ to its centroid defined in $mutation$, i.e., the solution with $m-1$ centroids
-    double z = 0.0;
-    for(int i = 0; i < x->n; i++) { // O(nd)
-        pr[i] = z + MathUtils::Pr(distCentroid[i], sumDist, alpha, x->n);
-        z = pr[i];
-    }
-
-    // Wheel roulette random choose of a data point. data points far from their centroids are more likely to be chosen
-    double r = MathUtils::fRand(0.0, pr[x->n-1]); // O(1)
-    int p = MathUtils::findIndex(pr, r, 0, x->n-1) + 1;
-    
-    for(int i = 0; i < m; i++) {
-        newcentroids[i] = new double[x->d];
-    }
-
-    // Re-insert the removed centroid in the position determined by the roulette wheel
-    for(int i = 0; i < m; i++) { // O(md)
-        if(i == barycenter) {
-            for(int j = 0; j < x->d; j++) {
-                newcentroids[barycenter][j] = x->data[(p*x->d)+j];
-            }
-        } else {
-            for(int j = 0; j < x->d; j++) {
-                newcentroids[i][j] = c3[i][j];
-            }
-        }
-    }
-
-    // Re-assign data points according to the solution with $m$ centroids
-    for(int i = 0; i < x->n; i++) { // O(nd)
-        if(MathUtils::pcDist(i, newcentroids[barycenter], x->d, x->data) < distCentroid[i]) {
-            mutated[i] = barycenter;
-        }
-    }
-
-    Solution* mutatedSolution = new Solution(mutated, alpha, x, m);
-    mutatedSolution->fixSolution(x, m, alpha);
-    MathUtils::deleteMatrix(newcentroids, m);
-
-    return mutatedSolution;
-}
-
-double mutationAlpha(double alpha) {
-    alpha = alpha + MathUtils::fRand(-MUTATION_NOISE, MUTATION_NOISE);
-    if(alpha > 1.0) {
-        return 1.0;
-    }
-    if(alpha < 0.0) {
-        return 0.0;
-    }
-    return alpha;
-}
-
 PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
     clock_t begin = clock();
 
@@ -455,22 +330,18 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
     double bestCost = MathUtils::MAX_FLOAT;
     unsigned short* bestSolution = new unsigned short[n];
     double alpha, bestAlpha;
-    double avgAlpha = 0.0;
 
     // Generate the initial population
     vector<Solution*> population = getInitialPopulation(x, m, prm);
     
     // Store the best solution
     for(unsigned short i = 0; i < population.size(); i++) {
-        if(population[i]->getCost() < bestCost) {
-            bestCost = population[i]->getCost();
-            bestAlpha = population[i]->getAlpha();
-            copy(population[i]->getAssignment(), population[i]->getAssignment() + n, bestSolution);
+        if(population[i]->GetCost() < bestCost) {
+            bestCost = population[i]->GetCost();
+            bestAlpha = population[i]->GetAlpha();
+            copy(population[i]->GetAssignment(), population[i]->GetAssignment() + n, bestSolution);
         }
     }
-
-    // Create an instance of Hamerly Kmeans
-    Kmeans* algorithm = new HamerlyKmeans();
 
     // Genetic algorithm general loop
 	while(((it-lastImprovement) < prm.itNoImprovement) && (it < prm.maxIt)) {
@@ -479,41 +350,28 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
         Solution* p1 = tournamentSelection(population, prm.W);
         Solution* p2 = tournamentSelection(population, prm.W);
 
-        // Cross the mutation factor
-        alpha = 0.5 * (p1->getAlpha() + p2->getAlpha());
-
         // Apply the crossover
-        Solution* offspring = crossover(p1, p2, x, m, alpha);
+        Solution* current_solution = crossover(p1, p2, x, m, 0.5 * (p1->GetAlpha() + p2->GetAlpha()));
         
         // Mutate mutation factor
-        if(prm.mutation)
-            alpha = mutationAlpha(alpha);
+        if(prm.mutation) {
+            current_solution->MutateAlpha();
+        }
 
         // Apply the mutation
-        Solution* mutatedSolution = mutation(offspring, x, m, alpha);
-        
-        unsigned short* mutatedAssignment = new unsigned short[n];
+        current_solution->Mutate();
 
-        copy(mutatedSolution->getAssignment(), mutatedSolution->getAssignment() + n, mutatedAssignment);
-
-        avgAlpha = avgAlpha + alpha;
-
-        // Apply local search to the mutated solution       
-        nbIter = nbIter + execute(algorithm, x, m, mutatedAssignment, MathUtils::MAX_INT);
-
-        delete mutatedSolution;
-
-        // Create a new solution with the local minima obtained by K-means local search
-        Solution* child = new Solution(mutatedAssignment, algorithm->getSSE(), alpha, x, m);
+        // Perform local search (k-means)
+        current_solution->DoLocalSearch(x);
 
         // Add child solution to population
-        population.push_back(child);
+        population.push_back(current_solution);
 
         // Update the best solution if is the case
-        if(child->getCost() < bestCost) {
-            bestCost = child->getCost();
-            bestAlpha = alpha;
-            copy(child->getAssignment(), child->getAssignment() + n, bestSolution);
+        if(current_solution->GetCost() < bestCost) {
+            bestCost = current_solution->GetCost();
+            bestAlpha = current_solution->GetAlpha();
+            copy(current_solution->GetAssignment(), current_solution->GetAssignment() + n, bestSolution);
             lastImprovement = it;
         }
 
@@ -523,16 +381,13 @@ PbRun * gaLoop(Dataset const *x, unsigned short m, Param prm) {
         }
 
         it++;
-        delete offspring;
     }
-    delete algorithm;
 
     elapsedSecs = double(clock() - begin) / CLOCKS_PER_SEC;
     nbIter = 1.0*nbIter/it;
-    avgAlpha = 1.0*avgAlpha/it;
 
     Solution * best = new Solution(bestSolution, bestCost, bestAlpha, x, m);
-    PbRun * sol = new PbRun(best, elapsedSecs, lastImprovement, nbIter, avgAlpha, 1);
+    PbRun * sol = new PbRun(best, elapsedSecs, lastImprovement, nbIter, 0.0, 1);
     
     for(unsigned short i = 0; i < population.size(); i++) {
         delete population[i];

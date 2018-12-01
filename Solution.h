@@ -4,7 +4,10 @@
 #include <iostream>
 #include <vector>
 #include "hamerly/dataset.h"
+#include "hamerly/hamerly_kmeans.h"
 #include "MathUtils.h"
+
+#define MUTATION_RATE 0.2
 
 using namespace std;
 
@@ -20,19 +23,25 @@ class Solution {
 
         double alpha;
 
+        double* data;
+
+        int n;
+
+        int d;
+
         int m;
 
-        void assignmentToCentroids(const Dataset* x, const int m);
+        void AssignmentToCentroids();
 
-        void centroidsToAssignment(const Dataset* x, const int m);
+        void CentroidsToAssignment();
 
-        void initAssignment(int n);
+        void InitAssignment();
 
-        void initCentroids(int m, int d);
+        void InitCentroids();
 
-        void deleteAssignment() { delete [] assignment; };
+        void DeleteAssignment() { delete [] assignment; };
 
-        void deleteCentroids(double** centroids, int m);
+        void DeleteCentroids();
 
     public:
         
@@ -46,15 +55,21 @@ class Solution {
 
         ~Solution();
 
-        unsigned short* getAssignment() { return assignment; };
+        unsigned short* GetAssignment() { return assignment; };
 
-        double** getCentroids() { return centroids; };
+        double** GetCentroids() { return centroids; };
 
-        double getCost() { return cost; }
+        double GetCost() { return cost; }
 
-        double getAlpha() { return alpha; }
+        double GetAlpha() { return alpha; }
 
-        void fixSolution(const Dataset* x, const int m, double alpha);
+        void Mutate();
+
+        void DoLocalSearch(Dataset const *x);
+
+        void MutateAlpha();
+
+        void Repair();
 };
 
 #endif
