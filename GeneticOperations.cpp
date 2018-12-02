@@ -54,7 +54,7 @@ void GeneticOperations::CreateInitialPopulation(const Dataset* x, bool is_mutabl
         unsigned short* assignment = GetKmeansAssignment(x);    
         double alpha = 1.0;
         if(is_mutable) {
-            alpha = MathUtils::fRand(0.0, 1.0);
+            alpha = MathUtils::RandBetween(0.0, 1.0);
         }
         Solution* s = new Solution(assignment, alpha, pb_data);
         s->DoLocalSearch(x);
@@ -103,15 +103,15 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
         algorithm->initialize(x, m, GetAssignment(i), 1); // O(m)
         int* card = GetCardinality(algorithm->getClusterSize()); // O(m)
         // Check if element is in hash: O(n) worst case
-        if(table->exist(card, GetCost(i), m)) {
-            heapClones->push_max(GetCost(i), i);
+        if(table->Exist(card, GetCost(i), m)) {
+            heapClones->PushMax(GetCost(i), i);
             delete [] card;
         } else {
             Item anItem;
             anItem.cost = GetCost(i);
             anItem.cardinality = card;
-            table->insert(anItem, m);
-            heapInd->push_max(GetCost(i), i);
+            table->Insert(anItem, m);
+            heapInd->PushMax(GetCost(i), i);
         }
         discarded[i] = 0;
     }
@@ -120,16 +120,16 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
     int j = 0;
     
     // For the two whiles: O(maxPop - sizePop)
-    while((j < (maxPopulation-size_population)) && (heapClones->getHeap().size() > 0)) {
-        id = heapClones->front_max().second;
-        heapClones->pop_max();
+    while((j < (maxPopulation-size_population)) && (heapClones->GetHeap().size() > 0)) {
+        id = heapClones->FrontMax().second;
+        heapClones->PopMax();
         discarded[id] = 1;
         j++;
     }
 
     while(j < (maxPopulation - size_population)) {
-        id = heapInd->front_max().second;
-        heapInd->pop_max();
+        id = heapInd->FrontMax().second;
+        heapInd->PopMax();
         discarded[id] = 1;
         j++;
     }
@@ -156,7 +156,7 @@ vector<long> GeneticOperations::MinAssignment(double** c1, double** c2) { //O(m^
     dlib::matrix<double> cost(m,m);
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < m; j++) {
-            cost(i,j) = -1.0 * MathUtils::squaredEuclidean(c1[i], c2[j], d);
+            cost(i,j) = -1.0 * MathUtils::SquaredEuclidean(c1[i], c2[j], d);
         }
     }
     std::vector<long> assignment = max_cost_assignment(cost);

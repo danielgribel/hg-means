@@ -23,15 +23,17 @@ class Hash {
         
         int length;
         
-        int hash(int* size, int m);
+        int DoHash(int* size, int m);
         
     public:
         
         Hash();
         
-        void insert(Item newItem, int m);
+        void Insert(Item newItem, int m);
         
-        bool exist(int* cardinality, double cost, int m);
+        bool Exist(int* cardinality, double cost, int m);
+
+        bool CheckSize(int* cardinalityA, int* cardinalityB, int m);
         
         ~Hash();
 };

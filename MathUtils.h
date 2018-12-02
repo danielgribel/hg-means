@@ -12,19 +12,19 @@ namespace MathUtils {
 	
 	const double MAX_INT = std::numeric_limits<int>::max();
 
-    int findIndex(std::vector<double> values, double key, int first, int last);
+    int FindIndex(std::vector<double> values, double key, int first, int last);
     
-    double fRand(double min, double max);
+    double RandBetween(double min, double max);
 
     double Pr(double dist, double sumDist, double alpha, int n);
 
-    std::string replaceString(std::string s, const std::string &toReplace, const std::string &replaceWith);
+    std::string ReplaceString(std::string s, const std::string &toReplace, const std::string &replaceWith);
 
-    double squaredEuclidean(double* a, double* b, int d);
+    double SquaredEuclidean(double* a, double* b, int d);
 
-    double pcDist(int p, double* center, int d, double* data);
+    double PointCenterDist(int p, double* center, int d, double* data);
 
-    void deleteMatrix(double** matrix, int m);
+    void DeleteMatrix(double** matrix, int m);
 }
 
 #endif

@@ -107,8 +107,8 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
     ofstream myfile;
     stringstream outfile;
 
-    fileData = MathUtils::replaceString(fileData, DATA_PATH, "");
-    fileData = MathUtils::replaceString(fileData, ".txt", "");
+    fileData = MathUtils::ReplaceString(fileData, DATA_PATH, "");
+    fileData = MathUtils::ReplaceString(fileData, ".txt", "");
 
     outfile << "out/" << fileData << '_' <<
                 setw(3) << setfill('0') << m << "_" <<

@@ -5,7 +5,7 @@ Hash::Hash() {
     array = vector< vector<Item> >(length);
 }
 
-int Hash::hash(int* cardinality, int m) {
+int Hash::DoHash(int* cardinality, int m) {
     sort(cardinality, cardinality + m);
     int value = 0;
 
@@ -16,12 +16,12 @@ int Hash::hash(int* cardinality, int m) {
     return value % length;
 }
 
-void Hash::insert(Item newItem, int m) {
-    int idx = hash(newItem.cardinality, m);
+void Hash::Insert(Item newItem, int m) {
+    int idx = DoHash(newItem.cardinality, m);
     array[idx].push_back(newItem);
 }
 
-bool checkSize(int* cardinalityA, int* cardinalityB, int m) {
+bool Hash::CheckSize(int* cardinalityA, int* cardinalityB, int m) {
     for(int i = 0; i < m; i++) {
         if(cardinalityA[i] != cardinalityB[i]) {
             return false;
@@ -30,10 +30,10 @@ bool checkSize(int* cardinalityA, int* cardinalityB, int m) {
     return true;
 }
 
-bool Hash::exist(int* cardinality, double cost, int m) {
-    int idx = hash(cardinality, m);
+bool Hash::Exist(int* cardinality, double cost, int m) {
+    int idx = DoHash(cardinality, m);
     for(int i = 0; i < array[idx].size(); i++) {
-        if ((checkSize(array[idx][i].cardinality, cardinality, m)) &&
+        if ((CheckSize(array[idx][i].cardinality, cardinality, m)) &&
             (cost > array[idx][i].cost - EPS) &&
             (cost < array[idx][i].cost + EPS)) {
             return true;

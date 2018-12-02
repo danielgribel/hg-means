@@ -131,7 +131,7 @@ double Evaluator::CentroidIndex() {
 	for(int i = 0; i < m; i++) {
 		double mindist = MathUtils::MAX_FLOAT;
 		for(int j = 0; j < m; j++) {
-			dist = MathUtils::squaredEuclidean(solution->GetCentroids()[i], ground_truth->GetCentroids()[j], d);
+			dist = MathUtils::SquaredEuclidean(solution->GetCentroids()[i], ground_truth->GetCentroids()[j], d);
 			if(dist < mindist) {
 				mindist = dist;
 				cmin = j;

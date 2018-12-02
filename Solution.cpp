@@ -71,7 +71,7 @@ void Solution::CentroidsToAssignment() { // O(nmd)
     for(int i = 0; i < n; i++) {
         mindist = MathUtils::MAX_FLOAT;
         for(int j = 0; j < m; j++) {
-            dist = MathUtils::pcDist(i, centroids[j], d, data);
+            dist = MathUtils::PointCenterDist(i, centroids[j], d, data);
             if(dist < mindist) {
                 mindist = dist;
                 assignment[i] = j;
@@ -109,7 +109,7 @@ void Solution::Repair() {
         vector<double> pr(n);
 
         for(int i = 0; i < n; i++) {
-            distToCentroid[i] = MathUtils::pcDist(i, centroids[assignment[i]], d, data);
+            distToCentroid[i] = MathUtils::PointCenterDist(i, centroids[assignment[i]], d, data);
             sumDist = sumDist + distToCentroid[i];
             sizes[assignment[i]] = sizes[assignment[i]]+1;
         }
@@ -124,8 +124,8 @@ void Solution::Repair() {
         int p;
 
         while(it < listEmpty.size()) {
-            double r = MathUtils::fRand(0.0, pr[n-1]); // O(1)
-            int p = MathUtils::findIndex(pr, r, 0, n-1) + 1;
+            double r = MathUtils::RandBetween(0.0, pr[n-1]); // O(1)
+            int p = MathUtils::FindIndex(pr, r, 0, n-1) + 1;
             if(sizes[assignment[p]] > 1) {
                 sizes[assignment[p]] = sizes[assignment[p]]-1;
                 assignment[p] = listEmpty[it];
@@ -168,7 +168,7 @@ void Solution::Mutate() {
         mindist = MathUtils::MAX_FLOAT;
         for(int j = 0; j < m; j++) {
             if(j != barycenter) {
-                dist = MathUtils::pcDist(i, c3[j], d, data);
+                dist = MathUtils::PointCenterDist(i, c3[j], d, data);
                 if(dist < mindist) {
                     mindist = dist;
                     assignment[i] = j;
@@ -179,7 +179,7 @@ void Solution::Mutate() {
 
     double sumDist = 0.0;
     for(int i = 0; i < n; i++) {
-        distCentroid[i] = MathUtils::pcDist(i, c3[assignment[i]], d, data);
+        distCentroid[i] = MathUtils::PointCenterDist(i, c3[assignment[i]], d, data);
         sumDist = sumDist + distCentroid[i];
     }
 
@@ -191,8 +191,8 @@ void Solution::Mutate() {
     }
 
     // Wheel roulette random choose of a data point. data points far from their centroids are more likely to be chosen
-    double r = MathUtils::fRand(0.0, pr[n-1]); // O(1)
-    int p = MathUtils::findIndex(pr, r, 0, n-1) + 1;
+    double r = MathUtils::RandBetween(0.0, pr[n-1]); // O(1)
+    int p = MathUtils::FindIndex(pr, r, 0, n-1) + 1;
     
     for(int i = 0; i < m; i++) {
         newcentroids[i] = new double[d];
@@ -213,16 +213,16 @@ void Solution::Mutate() {
 
     // Re-assign data points according to the solution with $m$ centroids
     for(int i = 0; i < n; i++) { // O(nd)
-        if(MathUtils::pcDist(i, newcentroids[barycenter], d, data) < distCentroid[i]) {
+        if(MathUtils::PointCenterDist(i, newcentroids[barycenter], d, data) < distCentroid[i]) {
             assignment[i] = barycenter;
         }
     }
     Repair();
-    MathUtils::deleteMatrix(newcentroids, m);
+    MathUtils::DeleteMatrix(newcentroids, m);
 }
 
 void Solution::MutateAlpha() {
-    alpha = alpha + MathUtils::fRand(-MUTATION_RATE, MUTATION_RATE);
+    alpha = alpha + MathUtils::RandBetween(-MUTATION_RATE, MUTATION_RATE);
     if(alpha > 1.0) {
         alpha = 1.0;
     }
@@ -273,5 +273,5 @@ void Solution::InitCentroids() {
 }
 
 void Solution::DeleteCentroids() {
-	MathUtils::deleteMatrix(centroids, pb_data.GetM());
+	MathUtils::DeleteMatrix(centroids, pb_data.GetM());
 }

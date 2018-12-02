@@ -19,23 +19,21 @@ class HeapPdi {
     
         ~HeapPdi();
     
-        void push_max(double cost, int val);
+        void PushMax(double cost, int val);
     
-        int pop_max();
+        int PopMax();
     
-        void push_min(double cost, int val);
+        void PushMin(double cost, int val);
     
-        int pop_min();
-    
-        std::vector< std::pair<double, int> > getHeap() { return heap; };
-    
-        void setHeap(std::vector< std::pair<double, int> > aHeap);
-    
-        void clearHeap();
-    
-        std::pair<double, int> front_max();
+        int PopMin();
+
+        std::pair<double, int> FrontMax();
 	
-    	std::pair<double, int> front_min();
+    	std::pair<double, int> FrontMin();
+
+        std::vector< std::pair<double, int> > GetHeap() { return heap; };
+    
+        void ClearHeap();
 };
 
 #endif
