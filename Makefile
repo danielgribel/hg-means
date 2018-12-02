@@ -14,10 +14,10 @@ HAMERLY_DIR = hamerly
 SRC_HAMERLY = $(wildcard $(HAMERLY_DIR)/*.cpp)
 OBJ_HAMERLY = $(SRC_HAMERLY:.cpp=.o)
 
-SRC_COMMOM = $(filter-out MainHG.cpp, $(wildcard *.cpp))
+SRC_COMMOM = $(filter-out Main.cpp, $(wildcard *.cpp))
 OBJ_COMMOM = $(SRC_COMMOM:.cpp=.o)
 
-SRC_HG = MainHG.cpp
+SRC_HG = Main.cpp
 OBJ_HG = $(SRC_HG:.cpp=.o)
 
 all: hgmeans
