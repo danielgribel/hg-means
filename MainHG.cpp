@@ -13,67 +13,7 @@ using namespace std;
 #define DATA_PATH "data/"
 #define CLASS_PATH "labels/"
 
-PbRun * ExecuteGA(Dataset const *x, PbData pb_data, Param prm) {
-    clock_t begin = clock();
-
-    const int n = pb_data.GetN();
-    const int m = pb_data.GetM();
-    int it = 0;
-    int lastImprovement = 0;
-    double elapsedSecs;
-
-    // Create an instance of GeneticOperations
-    GeneticOperations* genetic = new GeneticOperations(pb_data, prm.sizePopulation, prm.maxPopulation, prm.W);
-
-    // Generate the initial population
-    genetic->CreateInitialPopulation(x, prm.mutation);
-
-    // Genetic algorithm general loop
-	while(((it-lastImprovement) < prm.itNoImprovement) && (it < prm.maxIt)) {
-
-        // Select parent solutions for mate
-        Solution* p1 = genetic->SelectParent();
-        Solution* p2 = genetic->SelectParent();
-
-        // Apply the crossover
-        Solution* current_solution = genetic->Crossover(p1, p2);
-        
-        // Mutate mutation factor
-        if(prm.mutation) {
-            current_solution->MutateAlpha();
-        }
-
-        // Apply the mutation
-        current_solution->Mutate();
-
-        // Perform local search (K-means)
-        current_solution->DoLocalSearch(x);
-
-        // Add child solution to population
-        genetic->AddSolution(current_solution);
-
-        // Update the best solution
-        if(current_solution->GetCost() < genetic->GetBestSolution()->GetCost()) {
-            genetic->ReplaceBestSolution(current_solution);
-            lastImprovement = it;
-        }
-
-        // Select the survivors
-        if(genetic->GetPopulation().size() > prm.maxPopulation) {
-            genetic->SelectSurvivors(x);
-        }
-        it++;
-    }
-    elapsedSecs = double(clock() - begin) / CLOCKS_PER_SEC;
-    PbRun * sol = new PbRun(genetic->GetBestSolution(), elapsedSecs);
-    delete genetic;
-
-    cout << m << " " << genetic->GetBestSolution()->GetCost() << " " << elapsedSecs << endl;
-
-    return sol;
-}
-
-void demo(int seed, string fileData, Param prm, unsigned short m) {
+void Run(int seed, string fileData, Param prm, unsigned short m) {
     srand(seed);
 
     // Open the data file
@@ -122,16 +62,27 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
     }
 
     for(int i = 0; i < prm.nbRuns; i++) {
-        PbRun * r = ExecuteGA(x, pb_data, prm);
+        clock_t begin = clock();
 
+        // Create GeneticOperations instance
+        GeneticOperations* genetic = new GeneticOperations(pb_data, prm);
+
+        // Run the Genetic loop
+        genetic->HGMeans(x);
+        
+        // Measure cpu time in seconds
+        double elapsedSecs = double(clock() - begin) / CLOCKS_PER_SEC;
+        
+        cout << pb_data.GetM() << " " << genetic->GetBestSolution()->GetCost() << " " << elapsedSecs << endl;
+        
         if(SAVE_FILE) {
             myfile.open (outfile.str().c_str(), ofstream::out | ofstream::app);  
             myfile << prm.sizePopulation << " ";
             myfile << prm.maxIt << " ";
             myfile << fileData << " ";
             myfile << m << " ";
-            myfile << fixed << setprecision(10) << r->GetSolution()->GetCost() << " ";
-            myfile << fixed << setprecision(4) << r->GetTime() << " ";
+            myfile << fixed << setprecision(10) << genetic->GetBestSolution()->GetCost() << " ";
+            myfile << fixed << setprecision(4) << elapsedSecs << " ";
         }
 
         if(prm.eval) {
@@ -165,7 +116,7 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
                 return;
             } else {
                 Solution* ground_truth = new Solution(y, 0.0, pb_data);
-                Evaluator * eval = new Evaluator(pb_data, r->GetSolution(), ground_truth);                
+                Evaluator * eval = new Evaluator(pb_data, genetic->GetBestSolution(), ground_truth);                
                 // Clustering indexes
                 if(SAVE_FILE) {
                     myfile << fixed << setprecision(4) << eval->CRand() << " ";
@@ -181,10 +132,8 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
             myfile << "\n";
             myfile.close();
         }
-        delete r->GetSolution();
-        delete r;
+        delete genetic;
     }
-
     delete x;
 }
 
@@ -206,7 +155,7 @@ int main(int argc, char** argv) {
         }
         for(int i = 5; i < argc; i++) {
             m = atoi(argv[i]);
-            demo(16007, fileName, parameters, m);
+            Run(16007, fileName, parameters, m);
         }
 
     } catch (const exception& e) {

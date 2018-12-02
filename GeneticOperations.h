@@ -26,11 +26,7 @@ class GeneticOperations {
 
         PbData pb_data;
 
-        int size_population;
-
-        int max_population;
-
-        int w;
+        Param param;
 
         vector<long> MinAssignment(double** c1, double** c2);
         
@@ -42,7 +38,7 @@ class GeneticOperations {
 
     public:
         
-        GeneticOperations(PbData pb_data, int size_population, int max_population, int w);
+        GeneticOperations(PbData pb_data, Param param);
 
         ~GeneticOperations();
 
@@ -60,7 +56,7 @@ class GeneticOperations {
 
         Solution* SelectParent();
 
-        void CreateInitialPopulation(const Dataset* x, bool is_mutable);
+        void CreateInitialPopulation(const Dataset* x);
 
         void SelectSurvivors(const Dataset* x);
 
@@ -71,6 +67,8 @@ class GeneticOperations {
         void StoreBestSolution(Solution* s);
 
         void ReplaceBestSolution(Solution* s);
+
+        void HGMeans(const Dataset* x);
 };
 
 #endif

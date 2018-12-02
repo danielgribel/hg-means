@@ -1,10 +1,8 @@
 #include "GeneticOperations.h"
 
-GeneticOperations::GeneticOperations(PbData pb_data, int size_population, int max_population, int w) {
+GeneticOperations::GeneticOperations(PbData pb_data, Param param) {
     this->pb_data = pb_data;
-    this->size_population = size_population;
-    this->max_population = max_population;
-    this->w = w;
+    this->param = param;
 }
 
 GeneticOperations::~GeneticOperations() {
@@ -17,7 +15,7 @@ Solution* GeneticOperations::SelectParent() {
     Solution* bestSolution = NULL;
     double bestCost = MathUtils::MAX_FLOAT;
     unsigned short r;
-    for(int i = 0; i < w; i++) {
+    for(int i = 0; i < param.W; i++) {
         r = rand() % population.size();
         if(GetCost(r) < bestCost) {
             bestSolution = population[r];
@@ -47,13 +45,13 @@ unsigned short* GeneticOperations::GetKppAssignment(const Dataset* x) {
     return assignment;
 }
 
-void GeneticOperations::CreateInitialPopulation(const Dataset* x, bool is_mutable) {
+void GeneticOperations::CreateInitialPopulation(const Dataset* x) {
     Solution* best;
     double best_cost = MathUtils::MAX_FLOAT;
-    for(int i = 0; i < size_population; i++) {
+    for(int i = 0; i < param.sizePopulation; i++) {
         unsigned short* assignment = GetKmeansAssignment(x);    
         double alpha = 1.0;
-        if(is_mutable) {
+        if(param.mutation) {
             alpha = MathUtils::RandBetween(0.0, 1.0);
         }
         Solution* s = new Solution(assignment, alpha, pb_data);
@@ -120,14 +118,14 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
     int j = 0;
     
     // For the two whiles: O(maxPop - sizePop)
-    while((j < (maxPopulation-size_population)) && (heapClones->GetHeap().size() > 0)) {
+    while((j < (maxPopulation- param.sizePopulation)) && (heapClones->GetHeap().size() > 0)) {
         id = heapClones->FrontMax().second;
         heapClones->PopMax();
         discarded[id] = 1;
         j++;
     }
 
-    while(j < (maxPopulation - size_population)) {
+    while(j < (maxPopulation - param.sizePopulation)) {
         id = heapInd->FrontMax().second;
         heapInd->PopMax();
         discarded[id] = 1;
@@ -194,4 +192,49 @@ Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2) {
     off->Repair();
 
     return off;
+}
+
+void GeneticOperations::HGMeans(const Dataset* x) {
+    int it = 0;
+    int lastImprovement = 0;
+
+    // Generate the initial population
+    CreateInitialPopulation(x);
+
+    // Genetic algorithm general loop
+	while(((it-lastImprovement) < param.itNoImprovement) && (it < param.maxIt)) {
+
+        // Select parent solutions for mate
+        Solution* p1 = SelectParent();
+        Solution* p2 = SelectParent();
+
+        // Apply the crossover
+        Solution* current_solution = Crossover(p1, p2);
+        
+        // Mutate mutation factor
+        if(param.mutation) {
+            current_solution->MutateAlpha();
+        }
+
+        // Apply the mutation
+        current_solution->Mutate();
+
+        // Perform local search (K-means)
+        current_solution->DoLocalSearch(x);
+
+        // Add child solution to population
+        AddSolution(current_solution);
+
+        // Update the best solution
+        if(current_solution->GetCost() < GetBestSolution()->GetCost()) {
+            ReplaceBestSolution(current_solution);
+            lastImprovement = it;
+        }
+
+        // Select the survivors
+        if(GetPopulation().size() > param.maxPopulation) {
+            SelectSurvivors(x);
+        }
+        it++;
+    }
 }
