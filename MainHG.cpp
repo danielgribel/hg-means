@@ -121,11 +121,6 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
         myfile.close();
     }
 
-    // Clustering indexes
-    double crand = 0.0;
-    double nmi = 0.0;
-    double ci = 0.0;
-
     for(int i = 0; i < prm.nbRuns; i++) {
         PbRun * r = ExecuteGA(x, pb_data, prm);
 
@@ -169,23 +164,20 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
                 }
                 return;
             } else {
-                Solution* solution = r->GetSolution();
                 Solution* ground_truth = new Solution(y, 0.0, pb_data);
-                Evaluator * eval = new Evaluator(pb_data, solution, ground_truth);                
-                crand = eval->CRand();
-                nmi = eval->Nmi();
-                ci = eval->CentroidIndex();
+                Evaluator * eval = new Evaluator(pb_data, r->GetSolution(), ground_truth);                
+                // Clustering indexes
+                if(SAVE_FILE) {
+                    myfile << fixed << setprecision(4) << eval->CRand() << " ";
+                    myfile << fixed << setprecision(4) << eval->Nmi() << " ";
+                    myfile << fixed << setprecision(4) << eval->CentroidIndex();
+                }
                 delete eval;
                 delete ground_truth;
             }
         }
 
         if(SAVE_FILE) {
-            if(prm.eval) {
-                myfile << fixed << setprecision(4) << crand << " ";
-                myfile << fixed << setprecision(4) << nmi << " ";
-                myfile << fixed << setprecision(4) << ci;
-            }
             myfile << "\n";
             myfile.close();
         }
