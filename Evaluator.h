@@ -8,6 +8,8 @@
 #include <sys/resource.h>
 #include <math.h>
 #include "MathUtils.h"
+#include "PbData.h"
+#include "Solution.h"
 
 using namespace std;
 
@@ -15,37 +17,27 @@ class Evaluator {
 
     private:
 
-        int n; // number of data points
+        PbData pb_data;
 
-        int m; // number of clusters
+        Solution* solution;
 
-        int d; // number of dimensions
+        Solution* ground_truth;
 
-        unsigned short* y_pred; // assignment representation for solution
-
-        unsigned short* y; // label (class) of data points
-
-        double** c_pred; // solution centroids
-
-        double** c; // true partition centroids
-
-        void countRandCoefficients(int& a, int& b, int& c, int& d);
+        void CountRandCoefficients(int& a, int& b, int& c, int& d);
         
-        double ccDist(double* a, double* b);
-
     public:
 
-        Evaluator(int n, int m, int d, unsigned short* y_pred, unsigned short* y, double** c_pred, double** c);
+        Evaluator(PbData pb_data, Solution* solution, Solution* ground_truth);
     
         ~Evaluator();
 
-        double rand();
+        double Rand();
 
-        double cRand();
+        double CRand();
 
-        double nmi();
+        double Nmi();
 
-        double centroidIndex();
+        double CentroidIndex();
 };
 
 #endif

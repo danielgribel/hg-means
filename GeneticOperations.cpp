@@ -48,6 +48,8 @@ unsigned short* GeneticOperations::GetKppAssignment(const Dataset* x) {
 }
 
 void GeneticOperations::CreateInitialPopulation(const Dataset* x, bool is_mutable) {
+    Solution* best;
+    double best_cost = MathUtils::MAX_FLOAT;
     for(int i = 0; i < size_population; i++) {
         unsigned short* assignment = GetKmeansAssignment(x);    
         double alpha = 1.0;
@@ -57,11 +59,27 @@ void GeneticOperations::CreateInitialPopulation(const Dataset* x, bool is_mutabl
         Solution* s = new Solution(assignment, alpha, pb_data);
         s->DoLocalSearch(x);
         AddSolution(s);
+        if(s->GetCost() < best_cost) {
+            best = s;
+            best_cost = s->GetCost();
+        }
     }
+    StoreBestSolution(best);
+}
+
+void GeneticOperations::StoreBestSolution(Solution* s) {
+    unsigned short* best_assignment = new unsigned short[pb_data.GetN()];
+    copy(s->GetAssignment(), s->GetAssignment() + pb_data.GetN(), best_assignment);
+    best_solution = new Solution(best_assignment, s->GetCost(), s->GetAlpha(), pb_data);
+}
+
+void GeneticOperations::ReplaceBestSolution(Solution* s) {
+    delete best_solution;
+    StoreBestSolution(s);
 }
 
 int* GeneticOperations::GetCardinality(int** clusterSize) {
-    int* cardinality = new int[pb_data.GetM()];
+    int* cardinality = new int [pb_data.GetM()];
     for(int i = 0; i < pb_data.GetM(); i++) {
         cardinality[i] = clusterSize[0][i];
     }

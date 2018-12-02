@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <vector>
 
+using namespace std;
+
 #define EPS 0.00000001
 
 struct Item {
@@ -16,8 +18,8 @@ struct Item {
 class Hash {
     
     private:
-        
-        std::vector<Item>* array;
+
+        vector< vector<Item> > array;
         
         int length;
         

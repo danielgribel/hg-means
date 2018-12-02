@@ -21,24 +21,12 @@ PbRun * ExecuteGA(Dataset const *x, PbData pb_data, Param prm) {
     int it = 0;
     int lastImprovement = 0;
     double elapsedSecs;
-    double bestCost = MathUtils::MAX_FLOAT;
-    unsigned short* bestSolution = new unsigned short[n];
-    double bestAlpha;
 
     // Create an instance of GeneticOperations
     GeneticOperations* genetic = new GeneticOperations(pb_data, prm.sizePopulation, prm.maxPopulation, prm.W);
 
     // Generate the initial population
     genetic->CreateInitialPopulation(x, prm.mutation);
-
-    // Store the best solution
-    for(unsigned short i = 0; i < genetic->GetPopulation().size(); i++) {
-        if(genetic->GetCost(i) < bestCost) {
-            bestCost = genetic->GetCost(i);
-            bestAlpha = genetic->GetAlpha(i);
-            copy(genetic->GetAssignment(i), genetic->GetAssignment(i) + n, bestSolution);
-        }
-    }
 
     // Genetic algorithm general loop
 	while(((it-lastImprovement) < prm.itNoImprovement) && (it < prm.maxIt)) {
@@ -64,11 +52,9 @@ PbRun * ExecuteGA(Dataset const *x, PbData pb_data, Param prm) {
         // Add child solution to population
         genetic->AddSolution(current_solution);
 
-        // Update the best solution if is the case
-        if(current_solution->GetCost() < bestCost) {
-            bestCost = current_solution->GetCost();
-            bestAlpha = current_solution->GetAlpha();
-            copy(current_solution->GetAssignment(), current_solution->GetAssignment() + n, bestSolution);
+        // Update the best solution
+        if(current_solution->GetCost() < genetic->GetBestSolution()->GetCost()) {
+            genetic->ReplaceBestSolution(current_solution);
             lastImprovement = it;
         }
 
@@ -79,12 +65,10 @@ PbRun * ExecuteGA(Dataset const *x, PbData pb_data, Param prm) {
         it++;
     }
     elapsedSecs = double(clock() - begin) / CLOCKS_PER_SEC;
-    Solution * best = new Solution(bestSolution, bestCost, bestAlpha, pb_data);
-    PbRun * sol = new PbRun(best, elapsedSecs);
-    
+    PbRun * sol = new PbRun(genetic->GetBestSolution(), elapsedSecs);
     delete genetic;
 
-    cout << m << " " << bestCost << " " << elapsedSecs << endl;
+    cout << m << " " << genetic->GetBestSolution()->GetCost() << " " << elapsedSecs << endl;
 
     return sol;
 }
@@ -110,7 +94,6 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
     // Read the data values directly into the dataset
     for (int i = 0; i < n * d; ++i) {
         input >> x->data[i];
-        x->data[i] = 1.0*x->data[i];
     }
 
     if (x == NULL) {
@@ -186,15 +169,14 @@ void demo(int seed, string fileData, Param prm, unsigned short m) {
                 }
                 return;
             } else {
-                Solution* y_pred = r->GetSolution();
-                Solution* y_ = new Solution(y, 0.0, pb_data);
-                Evaluator * eval = new Evaluator(n, m, d,
-                    y_pred->GetAssignment(), y, y_pred->GetCentroids(), y_->GetCentroids());                
-                crand = eval->cRand();
-                nmi = eval->nmi();
-                ci = eval->centroidIndex();
+                Solution* solution = r->GetSolution();
+                Solution* ground_truth = new Solution(y, 0.0, pb_data);
+                Evaluator * eval = new Evaluator(pb_data, solution, ground_truth);                
+                crand = eval->CRand();
+                nmi = eval->Nmi();
+                ci = eval->CentroidIndex();
                 delete eval;
-                delete y_;
+                delete ground_truth;
             }
         }
 

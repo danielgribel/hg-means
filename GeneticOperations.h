@@ -22,6 +22,8 @@ class GeneticOperations {
 
         vector<Solution*> population;
 
+        Solution* best_solution;
+
         PbData pb_data;
 
         int size_population;
@@ -63,6 +65,12 @@ class GeneticOperations {
         void SelectSurvivors(const Dataset* x);
 
         Solution* Crossover(Solution* p1, Solution* p2);
+
+        Solution* GetBestSolution() { return best_solution; };
+
+        void StoreBestSolution(Solution* s);
+
+        void ReplaceBestSolution(Solution* s);
 };
 
 #endif

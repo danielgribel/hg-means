@@ -2,11 +2,11 @@
 
 Hash::Hash() {
     length = 37;
-    array = new std::vector<Item>[length];
+    array = vector< vector<Item> >(length);
 }
 
 int Hash::hash(int* cardinality, int m) {
-    std::sort(cardinality, cardinality + m);
+    sort(cardinality, cardinality + m);
     int value = 0;
 
     for(int i = 0; i < m; i++) {
@@ -48,5 +48,4 @@ Hash::~Hash() {
             delete [] array[i][j].cardinality;
         }
     }
-    delete [] array;
 }
