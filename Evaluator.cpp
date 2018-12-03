@@ -128,9 +128,9 @@ double Evaluator::CentroidIndex() {
 	vector<int> orphan(m, 1);
 	
 	for(int i = 0; i < m; i++) {
-		double mindist = MathUtils::MAX_FLOAT;
+		double mindist = MAX_FLOAT;
 		for(int j = 0; j < m; j++) {
-			dist = MathUtils::SquaredEuclidean(solution->GetCentroids()[i], ground_truth->GetCentroids()[j], d);
+			dist = SquaredEuclidean(solution->GetCentroids(i), ground_truth->GetCentroids(j), d);
 			if(dist < mindist) {
 				mindist = dist;
 				cmin = j;

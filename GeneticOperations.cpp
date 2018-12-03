@@ -13,7 +13,7 @@ GeneticOperations::~GeneticOperations() {
 
 Solution* GeneticOperations::SelectParent() {
     Solution* parent_solution = NULL;
-    double best_cost = MathUtils::MAX_FLOAT;
+    double best_cost = MAX_FLOAT;
     int r;
     for(int i = 0; i < param.w; i++) {
         r = rand() % population.size();
@@ -47,12 +47,12 @@ unsigned short* GeneticOperations::GetKppAssignment(const Dataset* x) {
 
 void GeneticOperations::CreateInitialPopulation(const Dataset* x) {
     Solution* best;
-    double best_cost = MathUtils::MAX_FLOAT;
+    double best_cost = MAX_FLOAT;
     for(int i = 0; i < param.size_population; i++) {
         unsigned short* assignment = GetKmeansAssignment(x);    
         double alpha = 1.0;
         if(param.mutation) {
-            alpha = MathUtils::RandBetween(0.0, 1.0);
+            alpha = RandBetween(0.0, 1.0);
         }
         Solution* s = new Solution(assignment, alpha, pb_data);
         s->DoLocalSearch(x);
@@ -110,7 +110,6 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
     vector<int> discarded(max_population);
     vector< pair<double, int> > heap_individuals;
     vector< pair<double, int> > heap_clones;
-
     Kmeans* algorithm = new HamerlyKmeans();
 
     // O(max_population x n)
@@ -135,7 +134,7 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
     int id;
     int j = 0;
     
-    // For the two whiles: O(max_population - sizePopulation)
+    // For the two whiles: O(max_population - size_population)
     while((j < (max_population- param.size_population)) && (heap_clones.size() > 0)) {
         id = FrontMax(heap_clones).second;
         PopMax(heap_clones);
@@ -162,13 +161,13 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
 }
 
 // Get the centroids assignment (perfect matching)
-vector<long> GeneticOperations::MinAssignment(double** c1, double** c2) { //O(m^2d)
+vector<long> GeneticOperations::MinAssignment(vector< vector<double> > c1, vector< vector<double> > c2) { //O(m^2d)
     int m = pb_data.GetM();
     int d = pb_data.GetD();
     dlib::matrix<double> cost(m,m);
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < m; j++) {
-            cost(i,j) = -1.0 * MathUtils::SquaredEuclidean(c1[i], c2[j], d);
+            cost(i,j) = -1.0 * SquaredEuclidean(c1[i], c2[j], d);
         }
     }
     vector<long> assignment = max_cost_assignment(cost);
@@ -179,12 +178,9 @@ Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2) {
     int d = pb_data.GetD();
     int m = pb_data.GetM();
     double alpha = 0.5 * (p1->GetAlpha() + p2->GetAlpha());
-    double** c1 = p1->GetCentroids();
-    double** c2 = p2->GetCentroids();
-    double** c3 = new double* [m];
-    for(int i = 0; i < m; i++) {
-        c3[i] = new double[d];
-    }
+    vector< vector<double> > c1 = p1->GetCentroids();
+    vector< vector<double> > c2 = p2->GetCentroids();
+    vector< vector<double> > c3 (m, vector<double>(d));
 
     vector<long> matching = MinAssignment(c1, c2); // O(m^3)  Hungarian method
 

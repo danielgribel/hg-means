@@ -46,8 +46,8 @@ void Run(int seed, string fileData, Param prm, int m) {
     ofstream writer_output;
     stringstream filename_output;
 
-    fileData = MathUtils::ReplaceString(fileData, DATA_PATH, "");
-    fileData = MathUtils::ReplaceString(fileData, ".txt", "");
+    fileData = ReplaceString(fileData, DATA_PATH, "");
+    fileData = ReplaceString(fileData, ".txt", "");
 
     filename_output << "out/" << fileData << '_' <<
                 setw(3) << setfill('0') << m << "_" <<
@@ -99,7 +99,7 @@ void Run(int seed, string fileData, Param prm, int m) {
             unsigned short* y = new unsigned short[n];
             for (int i = 0; i < n; ++i) {
                 inputLabels >> y[i];
-                y[i] = y[i] - 1; // labels file starts from 1
+                y[i] = y[i] - 1; // Labels file starts from 1
                 if(y[i] > max)
                     max = y[i];
             }

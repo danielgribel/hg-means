@@ -6,6 +6,8 @@
 #include <limits>
 #include <vector>
 
+using namespace std;
+
 namespace MathUtils {
 	
     // Infinite float
@@ -30,13 +32,10 @@ namespace MathUtils {
     std::string ReplaceString(std::string s, const std::string &toReplace, const std::string &replaceWith);
 
     // Squared Euclidean distance of two general data points in R^d
-    double SquaredEuclidean(double* a, double* b, int d);
+    double SquaredEuclidean(vector<double> a, vector<double> b, int d);
 
     // Squared Euclidean distance of a point (given by index in dataset) to a centroid
-    double PointCenterDist(int p, double* center, int d, double* data);
-
-    // Memory free
-    void DeleteMatrix(double** matrix, int m);
+    double PointCenterDist(int p, vector<double> center, int d, double* data);
 }
 
 #endif

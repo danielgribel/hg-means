@@ -11,6 +11,7 @@
 #define MUTATION_RATE 0.2
 
 using namespace std;
+using namespace MathUtils;
 
 class Solution {
     
@@ -20,7 +21,7 @@ class Solution {
         unsigned short* assignment;
 
         // Centroids representation of a solution
-        double** centroids;
+        vector< vector<double> > centroids;
         
         // Solution cost, in terms of MSSC objective
         double cost;
@@ -46,28 +47,30 @@ class Solution {
         // Assignment free memory
         void DeleteAssignment() { delete [] assignment; };
 
-        // Centroids free memory
-        void DeleteCentroids();
-
     public:
         
         // Constructor in which we know solution assignment and cost 
         Solution(unsigned short* assignment, double cost, double alpha, PbData pb_data);
 
         // Constructor in which we know solution centroids and cost 
-        Solution(double** centroids, double cost, double alpha, PbData pb_data);
+        Solution(vector< vector<double> > centroids, double cost, double alpha, PbData pb_data);
 
         // Constructor in which we know solution assignment 
         Solution(unsigned short* assignment, double alpha, PbData pb_data);
 
         // Constructor in which we know solution centroids
-        Solution(double** centroids, double alpha, PbData pb_data);
+        Solution(vector< vector<double> > centroids, double alpha, PbData pb_data);
 
         ~Solution();
 
+        // Get the assignment representation
         unsigned short* GetAssignment() { return assignment; };
 
-        double** GetCentroids() { return centroids; };
+        // Get all centroids
+        vector< vector<double> > GetCentroids() { return centroids; };
+
+        // Get especific centroid 
+        vector<double> GetCentroids(int i) { return centroids[i]; };
 
         double GetCost() { return cost; }
 

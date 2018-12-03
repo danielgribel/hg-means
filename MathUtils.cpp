@@ -35,7 +35,7 @@ namespace MathUtils {
         return(s.replace(s.find(toReplace), toReplace.length(), replaceWith));
     }
 
-    double SquaredEuclidean(double* a, double* b, int d) { // O(d)
+    double SquaredEuclidean(vector<double> a, vector<double> b, int d) { // O(d)
         double dist = 0.0;
         for(int i = 0; i < d; i++) {
             dist = dist + ( (a[i] - b[i]) * (a[i] - b[i]) );
@@ -44,7 +44,7 @@ namespace MathUtils {
     }
 
     // Get the distance between a data point and a centroid
-    double PointCenterDist(int p, double* center, int d, double *data) {
+    double PointCenterDist(int p, vector<double> center, int d, double *data) {
         double dist = 0.0;
         for(int i = 0; i < d; i++) {
             dist = dist + ( (data[p*d+i] - center[i])*(data[p*d+i] - center[i]) );

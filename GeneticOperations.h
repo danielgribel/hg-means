@@ -32,7 +32,7 @@ class GeneticOperations {
         Param param;
 
         // Get the minimum assignment between two centroids. Hungarian method of Dlib is used
-        vector<long> MinAssignment(double** c1, double** c2);
+        vector<long> MinAssignment(vector< vector<double> > c1, vector< vector<double> > c2);
         
         // Generate a solution for MSSC with initial centers randomly chosen 
         unsigned short* GetKmeansAssignment(const Dataset* x);
@@ -43,10 +43,13 @@ class GeneticOperations {
         // Get the cardinalities (number of points) of clusters
         int* GetCardinality(int** clusterSize);
 
+        // Push element to heap, such that the element with maximum value is on top
         void PushMax(vector< pair<double, int> >& heap, double cost, int val);
         
+        // Pop the maximum-valued element from heap
         int PopMax(vector< pair<double, int> >& heap);
         
+        // Get the maximum-valued element from heap
         pair<double, int> FrontMax(vector< pair<double, int> >& heap);
 
     public:
@@ -55,6 +58,7 @@ class GeneticOperations {
 
         ~GeneticOperations();
 
+        // Get the population of solutions
         vector<Solution*> GetPopulation() { return population; };
 
         // Add solution to current population
@@ -84,6 +88,7 @@ class GeneticOperations {
         // Perform exact minimum-cost matching crossover
         Solution* Crossover(Solution* p1, Solution* p2);
 
+        // Get the best solution of the population -- in terms of MSSC objective
         Solution* GetBestSolution() { return best_solution; };
 
         // Store the best solution of the population

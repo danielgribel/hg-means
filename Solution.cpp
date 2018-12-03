@@ -4,7 +4,6 @@ Solution::Solution(unsigned short* assignment, double alpha, PbData pb_data) {
 	this->assignment = assignment;
     this->alpha = alpha;
     this->pb_data = pb_data;
-    InitCentroids();
     AssignmentToCentroids();
 }
 
@@ -13,39 +12,36 @@ Solution::Solution(unsigned short* assignment, double cost, double alpha, PbData
     this->cost = cost;
     this->alpha = alpha;
     this->pb_data = pb_data;
-    InitCentroids();
     AssignmentToCentroids();
 }
 
-Solution::Solution(double** centroids, double cost, double alpha, PbData pb_data) {
+Solution::Solution(vector< vector<double> > centroids, double cost, double alpha, PbData pb_data) {
 	this->centroids = centroids;
     this->cost = cost;
     this->alpha = alpha;
     this->pb_data = pb_data;
-    InitAssignment();
     CentroidsToAssignment();
 }
 
-Solution::Solution(double** centroids, double alpha, PbData pb_data) {
+Solution::Solution(vector< vector<double> > centroids, double alpha, PbData pb_data) {
 	this->centroids = centroids;
     this->alpha = alpha;
     this->pb_data = pb_data;
-    InitAssignment();
     CentroidsToAssignment();
 }
 
 Solution::~Solution() {
     DeleteAssignment();
-    DeleteCentroids();
 }
 
 void Solution::AssignmentToCentroids() { // O(nd)
+    InitCentroids();
     int n = pb_data.GetN();
     int d = pb_data.GetD();
     int m = pb_data.GetM();
     double* data = pb_data.GetData();
-
     vector<int> sizes(m,0);
+
     for(int i = 0; i < n; i++) {
         sizes[assignment[i]] = sizes[assignment[i]]+1;
         for(int j = 0; j < d; j++) {
@@ -62,16 +58,16 @@ void Solution::AssignmentToCentroids() { // O(nd)
 }
 
 void Solution::CentroidsToAssignment() { // O(nmd)
+    InitAssignment();
     int n = pb_data.GetN();
     int d = pb_data.GetD();
     int m = pb_data.GetM();
     double* data = pb_data.GetData();
-    double mindist;
-    double dist;
+    double dist, mindist;
     for(int i = 0; i < n; i++) {
-        mindist = MathUtils::MAX_FLOAT;
+        mindist = MAX_FLOAT;
         for(int j = 0; j < m; j++) {
-            dist = MathUtils::PointCenterDist(i, centroids[j], d, data);
+            dist = PointCenterDist(i, centroids[j], d, data);
             if(dist < mindist) {
                 mindist = dist;
                 assignment[i] = j;
@@ -87,7 +83,7 @@ void Solution::Repair() {
     double* data = pb_data.GetData();
 
     vector<bool> populated(m, false); // the (boolean) list of empty clusters 
-    vector<int> listEmpty; // the list of empty clusters
+    vector<int> empty_clusters; // the list of empty clusters
     
     // Identify populated and empty clusters
     for(int i = 0; i < n; i++)
@@ -96,45 +92,41 @@ void Solution::Repair() {
     // Construct the list of empty clusters
     for(int j = 0; j < m; j++) {
         if(populated[j] == false)
-            listEmpty.push_back(j);
+            empty_clusters.push_back(j);
     }
 
-    if(listEmpty.size() > 0) {
-        vector<double> distToCentroid(n); // The distance from data points to their centroids
-        double sumDist = 0.0; // Sum of all distances from data points to their centroids
+    if(empty_clusters.size() > 0) {
+        vector<double> dist_centroid(n); // The distance from data points to their centroids
+        double sum_dist = 0.0; // Sum of all distances from data points to their centroids
         vector<int> sizes(m, 0); // The size (cardinality) of clusters
-        DeleteCentroids();
-        InitCentroids();
         AssignmentToCentroids();
         vector<double> pr(n);
 
         for(int i = 0; i < n; i++) {
-            distToCentroid[i] = MathUtils::PointCenterDist(i, centroids[assignment[i]], d, data);
-            sumDist = sumDist + distToCentroid[i];
+            dist_centroid[i] = PointCenterDist(i, centroids[assignment[i]], d, data);
+            sum_dist = sum_dist + dist_centroid[i];
             sizes[assignment[i]] = sizes[assignment[i]]+1;
         }
 
         double z = 0.0;
         for(int i = 0; i < n; i++) {
-            pr[i] = z + MathUtils::Pr(distToCentroid[i], sumDist, alpha, n);
+            pr[i] = z + Pr(dist_centroid[i], sum_dist, alpha, n);
             z = pr[i];
         }
 
         int it = 0;
         int p;
 
-        while(it < listEmpty.size()) {
-            double r = MathUtils::RandBetween(0.0, pr[n-1]); // O(1)
-            int p = MathUtils::FindIndex(pr, r, 0, n-1) + 1;
+        while(it < empty_clusters.size()) {
+            double r = RandBetween(0.0, pr[n-1]); // O(1)
+            int p = FindIndex(pr, r, 0, n-1) + 1;
             if(sizes[assignment[p]] > 1) {
                 sizes[assignment[p]] = sizes[assignment[p]]-1;
-                assignment[p] = listEmpty[it];
+                assignment[p] = empty_clusters[it];
                 it++;
             }
         }
     }
-    DeleteCentroids();
-	InitCentroids();
 	AssignmentToCentroids();
 }
 
@@ -143,60 +135,55 @@ void Solution::Mutate() {
     int d = pb_data.GetD();
     int m = pb_data.GetM();
     double* data = pb_data.GetData();
-    vector<double> distCentroid(n);
+    vector<double> dist_centroid (n);
     vector<double> pr (n);
-    vector<int> barycenterObj;
-    double** newcentroids = new double* [m];
-    double mindist;
-    double dist;
-    int i;
-
+    vector<int> barycenter_obj;
+    vector< vector<double> > newcentroids (m, vector<double>(d));
+    double dist, mindist;
+    
     // Randomly select one centroid to remove it from the solution
     int barycenter = rand() % m;
-    double** c3 = centroids;
+    vector< vector<double> > c3 = centroids;
 
     // Keep the data points assigned to the centroid to be removed
     for(int i = 0; i < n; i++) { // O(n)
         if(assignment[i] == barycenter) {
-            barycenterObj.push_back(i);
+            barycenter_obj.push_back(i);
         }
     }
 
+    int b;
     // Re-assign data points to the closest remaining centroid
-    for(int q = 0; q < barycenterObj.size(); q++) { // O(|c|md)
-        i = barycenterObj[q];
-        mindist = MathUtils::MAX_FLOAT;
+    for(int q = 0; q < barycenter_obj.size(); q++) { // O(|c|md)
+        b = barycenter_obj[q];
+        mindist = MAX_FLOAT;
         for(int j = 0; j < m; j++) {
             if(j != barycenter) {
-                dist = MathUtils::PointCenterDist(i, c3[j], d, data);
+                dist = PointCenterDist(b, c3[j], d, data);
                 if(dist < mindist) {
                     mindist = dist;
-                    assignment[i] = j;
-                }    
+                    assignment[b] = j;
+                }
             }
         }
     }
 
     double sumDist = 0.0;
     for(int i = 0; i < n; i++) {
-        distCentroid[i] = MathUtils::PointCenterDist(i, c3[assignment[i]], d, data);
-        sumDist = sumDist + distCentroid[i];
+        dist_centroid[i] = PointCenterDist(i, c3[assignment[i]], d, data);
+        sumDist = sumDist + dist_centroid[i];
     }
 
     // Get the cumulative distance from each data point $i$ to its centroid defined in $mutation$, i.e., the solution with $m-1$ centroids
     double z = 0.0;
     for(int i = 0; i < n; i++) { // O(nd)
-        pr[i] = z + MathUtils::Pr(distCentroid[i], sumDist, alpha, n);
+        pr[i] = z + Pr(dist_centroid[i], sumDist, alpha, n);
         z = pr[i];
     }
 
     // Wheel roulette random choose of a data point. data points far from their centroids are more likely to be chosen
-    double r = MathUtils::RandBetween(0.0, pr[n-1]); // O(1)
-    int p = MathUtils::FindIndex(pr, r, 0, n-1) + 1;
-    
-    for(int i = 0; i < m; i++) {
-        newcentroids[i] = new double[d];
-    }
+    double r = RandBetween(0.0, pr[n-1]); // O(1)
+    int p = FindIndex(pr, r, 0, n-1) + 1;
 
     // Re-insert the removed centroid in the position determined by the roulette wheel
     for(int i = 0; i < m; i++) { // O(md)
@@ -213,16 +200,15 @@ void Solution::Mutate() {
 
     // Re-assign data points according to the solution with $m$ centroids
     for(int i = 0; i < n; i++) { // O(nd)
-        if(MathUtils::PointCenterDist(i, newcentroids[barycenter], d, data) < distCentroid[i]) {
+        if(PointCenterDist(i, newcentroids[barycenter], d, data) < dist_centroid[i]) {
             assignment[i] = barycenter;
         }
     }
     Repair();
-    MathUtils::DeleteMatrix(newcentroids, m);
 }
 
 void Solution::MutateAlpha() {
-    alpha = alpha + MathUtils::RandBetween(-MUTATION_RATE, MUTATION_RATE);
+    alpha = alpha + RandBetween(-MUTATION_RATE, MUTATION_RATE);
     if(alpha > 1.0) {
         alpha = 1.0;
     }
@@ -232,10 +218,7 @@ void Solution::MutateAlpha() {
 }
 
 void Solution::DoLocalSearch(Dataset const *x) {
-    int m = pb_data.GetM();
     Kmeans *algorithm = new HamerlyKmeans();
-    int numThreads = 1;
-
     // Check for missing initialization
     if(assignment == NULL) {
         cerr << "Please initialize centers first" << endl;
@@ -245,13 +228,9 @@ void Solution::DoLocalSearch(Dataset const *x) {
         cerr << "Please load a dataset first" << endl;
         return;
     }
-
-    // Time the execution and get the number of iterations
-    algorithm->initialize(x, m, assignment, numThreads);
-    int numIt = algorithm->run(MathUtils::MAX_INT);
+    algorithm->initialize(x, pb_data.GetM(), assignment, 1);
+    int numIt = algorithm->run(MAX_INT);
     cost = algorithm->getSSE();
-    DeleteCentroids();
-    InitCentroids();
     AssignmentToCentroids();
     delete algorithm;
 }
@@ -263,15 +242,5 @@ void Solution::InitAssignment() {
 void Solution::InitCentroids() {
     int d = pb_data.GetD();
     int m = pb_data.GetM();
-	centroids = new double*[m];
-    for(int i = 0; i < m; i++) {
-        centroids[i] = new double[d];
-        for(int j = 0; j < d; j++) {
-            centroids[i][j] = 0.0;
-        }
-    }
-}
-
-void Solution::DeleteCentroids() {
-	MathUtils::DeleteMatrix(centroids, pb_data.GetM());
+    centroids = vector< vector<double> > (m, vector<double>(d,0.0));
 }
