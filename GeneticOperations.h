@@ -3,15 +3,17 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <iterator>
+#include <functional>
 #include "hamerly/dataset.h"
 #include "hamerly/kmeans.h"
 #include "hamerly/general_functions.h"
 #include "PbData.h"
 #include "Solution.h"
 #include "MathUtils.h"
-// #include "Param.h"
 #include "Hash.h"
-#include "Heap.h"
+// #include "Heap.h"
 #include "dlib-master/dlib/optimization/max_cost_assignment.h"
 
 using namespace std;
@@ -35,6 +37,12 @@ class GeneticOperations {
         unsigned short* GetKppAssignment(const Dataset* x);
 
         int* GetCardinality(int** clusterSize);
+
+        void PushMax(vector< pair<double, int> >& heap, double cost, int val);
+        
+        int PopMax(vector< pair<double, int> >& heap);
+        
+        pair<double, int> FrontMax(vector< pair<double, int> >& heap);
 
     public:
         
