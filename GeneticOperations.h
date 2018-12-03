@@ -86,10 +86,13 @@ class GeneticOperations {
 
         Solution* GetBestSolution() { return best_solution; };
 
+        // Store the best solution of the population
         void StoreBestSolution(Solution* s);
 
+        // Delete current best solution and replace it
         void ReplaceBestSolution(Solution* s);
 
+        // Execute the Hybrid Genetic algorithm for the MSSC
         void HGMeans(const Dataset* x);
 };
 

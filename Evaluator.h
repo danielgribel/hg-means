@@ -17,6 +17,7 @@ class Evaluator {
 
     private:
 
+        // Problem Data
         PbData pb_data;
 
         // Clustering Solution produced by the algorithm
@@ -25,6 +26,7 @@ class Evaluator {
         // Clustering Solution representing the ground truth
         Solution* ground_truth;
 
+        // Count coefficients for Rand and C-Rand indicators
         void CountRandCoefficients(int& a, int& b, int& c, int& d);
         
     public:

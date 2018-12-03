@@ -38,7 +38,6 @@ void Evaluator::CountRandCoefficients(int& a, int& b, int& c, int& d) {
 	}
 }
 
-// Get Rand indicator, a measure for partitions agreement
 double Evaluator::Rand() {
 	int a, b, c, d;
 	CountRandCoefficients(a, b, c, d);
@@ -46,7 +45,6 @@ double Evaluator::Rand() {
 	return randIndex;
 }
 
-// Get C-rand indicator (or adjusted rand), a measure for partitions agreement
 double Evaluator::CRand() {
 	int a, b, c, d;
 	CountRandCoefficients(a, b, c, d);
@@ -55,7 +53,7 @@ double Evaluator::CRand() {
 	return crandIndex;
 }
 
-// Implemented by Carlo Nicolini
+// Implemented by @Carlo Nicolini
 // More information in the original repository: https://github.com/CarloNicolini/rnmi
 double Evaluator::Nmi() {
 	int n = pb_data.GetN();
@@ -79,8 +77,8 @@ double Evaluator::Nmi() {
 
 	vector< vector<int> > A;
 	vector< vector<int> > B;
-	A.resize(qa); //existing structure
-	B.resize(qa); //counting structure
+	A.resize(qa); // Existing structure
+	B.resize(qa); // Counting structure
 	for(int i = 0; i < n; i++) {
 		int q = pa[i];
 		int t = pb[i];
@@ -93,10 +91,10 @@ double Evaluator::Nmi() {
 				break;
 			}
 		}
-		if(idx == -1) {//pair [x y] did not show up
+		if(idx == -1) { // Pair [x y] did not show up
 			A[q].push_back(t);
 			B[q].push_back(1);
-		} else {// [x y] is there
+		} else { // [x y] is there
 			B[q][idx] += 1;
 		}
 	}
@@ -123,7 +121,6 @@ double Evaluator::Nmi() {
 	return -2.0*Iab/(Ha+Hb);
 }
 
-// Get the centroid index indicator
 double Evaluator::CentroidIndex() {
 	int d = pb_data.GetD();
 	int m = pb_data.GetM();

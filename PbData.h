@@ -5,13 +5,29 @@
 
 // Parameters of the problem
 struct Param {
+
+    // Size of Tournament selection for parents mate
 	int w;
+
+    // Population size
 	int size_population;
+
+    // Maximum size allowed to population
     int max_population;
+
+    // Maximum number of iteratios the algorithm will take
     int max_it;
+
+    // Maximum number of iteratios without improvement the algorithm will take
     int no_improvement_it;
+
+    // Number of runs
     int nb_runs;
+
+    // If mutation is activated or not
     bool mutation;
+
+    // If evaluation is activated or not -- in terms of C-Rand, NMI, Centroid Index, etc
     bool eval;
 };
 
