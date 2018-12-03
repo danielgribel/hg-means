@@ -4,8 +4,6 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <iterator>
-#include <functional>
 #include "hamerly/dataset.h"
 #include "hamerly/kmeans.h"
 #include "hamerly/general_functions.h"
@@ -13,7 +11,6 @@
 #include "Solution.h"
 #include "MathUtils.h"
 #include "Hash.h"
-// #include "Heap.h"
 #include "dlib-master/dlib/optimization/max_cost_assignment.h"
 
 using namespace std;
