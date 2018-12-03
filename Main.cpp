@@ -150,10 +150,10 @@ int main(int argc, char** argv) {
         }
         for(int i = 5; i < argc; i++) {
             m = atoi(argv[i]);
-            if(m > 0 && m < 65535) {
+            if(m > 0 && m < USHRT_MAX) { // Range for m should be [1, 65535]
                 Run(16007, fileName, parameters, m);
             } else {
-                cerr << "The number of clusters is out of the limit [1, 65535]" << endl;
+                cerr << "The number of clusters is out of the limit [1, " << USHRT_MAX << "]" << endl;
             }
         }
     } catch (const exception& e) {
