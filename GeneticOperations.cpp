@@ -6,7 +6,7 @@ GeneticOperations::GeneticOperations(PbData pb_data, Param param) {
 }
 
 GeneticOperations::~GeneticOperations() {
-    for(unsigned short i = 0; i < population.size(); i++) {
+    for(int i = 0; i < population.size(); i++) {
         DeleteSolution(i);
     }
 }
@@ -14,7 +14,7 @@ GeneticOperations::~GeneticOperations() {
 Solution* GeneticOperations::SelectParent() {
     Solution* parent_solution = NULL;
     double best_cost = MathUtils::MAX_FLOAT;
-    unsigned short r;
+    int r;
     for(int i = 0; i < param.W; i++) {
         r = rand() % population.size();
         if(GetCost(r) < best_cost) {
@@ -118,7 +118,7 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
 
     Kmeans* algorithm = new HamerlyKmeans();
 
-    for(unsigned short i = 0; i < max_population; i++) { // O(maxPop x n)
+    for(int i = 0; i < max_population; i++) { // O(maxPop x n)
         algorithm->initialize(x, m, GetAssignment(i), 1); // O(m)
         int* card = GetCardinality(algorithm->getClusterSize()); // O(m)
         // Check if element is in hash: O(n) worst case
@@ -160,7 +160,7 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
         j++;
     }
 
-    for(unsigned short i = 0; i < max_population; i++) { // O(maxPop)
+    for(int i = 0; i < max_population; i++) { // O(maxPop)
         if(discarded[i] == 0) {
             new_population.push_back(population[i]);
         } else {

@@ -12,7 +12,7 @@ using namespace std;
 #define DATA_PATH "data/"
 #define CLASS_PATH "labels/"
 
-void Run(int seed, string fileData, Param prm, unsigned short m) {
+void Run(int seed, string fileData, Param prm, int m) {
     srand(seed);
 
     // Open the data file
