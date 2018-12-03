@@ -1,7 +1,10 @@
 # HG-means
 Source code of HG-means clustering
 
-# Run:
+#Article
+"HG-means: A scalable hybrid genetic algorithm for minimum sum-of- squares clustering"
+
+# Run
 `> make clean`
 
 `> make`
