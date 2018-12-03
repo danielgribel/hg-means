@@ -12,6 +12,68 @@ using namespace std;
 #define DATA_PATH "data/"
 #define CLASS_PATH "labels/"
 
+void SaveOutput(ofstream& writer_output, stringstream& filename_output, GeneticOperations* genetic, double elapsedSecs) {
+    Param prm = genetic->GetParam();
+    PbData pb_data = genetic->GetPbData();
+    int n = pb_data.GetN();
+    int m = pb_data.GetM();
+    string instance = pb_data.GetInstanceName();
+
+    if(SAVE_FILE) {
+        writer_output.open (filename_output.str().c_str(), ofstream::out | ofstream::app);  
+        writer_output << prm.size_population << " ";
+        writer_output << prm.max_it << " ";
+        writer_output << instance << " ";
+        writer_output << m << " ";
+        writer_output << fixed << setprecision(10) << genetic->GetBestSolution()->GetCost() << " ";
+        writer_output << fixed << setprecision(4) << elapsedSecs << " ";
+    }
+    if(prm.eval) {
+        string fileLabels = CLASS_PATH + instance + ".txt";
+        // Open the labels file
+        ifstream inputLabels(fileLabels.c_str());
+        if (! inputLabels) {
+            cerr << "Unable to open labels file: " << fileLabels << endl;
+            if(SAVE_FILE) {
+                writer_output << "\n";
+                writer_output.close();
+            }
+            return;
+        }
+        int max = 0;
+        unsigned short* y = new unsigned short[n];
+        for (int i = 0; i < n; ++i) {
+            inputLabels >> y[i];
+            y[i] = y[i] - 1; // Labels file starts from 1
+            if(y[i] > max)
+                max = y[i];
+        }
+        if(max != m-1) {
+            cerr << "Number of labels does not match m" << endl;
+            if(SAVE_FILE) {
+                writer_output << "\n";
+                writer_output.close();
+            }
+            return;
+        } else {
+            Solution* ground_truth = new Solution(y, 0.0, pb_data);
+            Evaluator * eval = new Evaluator(pb_data, genetic->GetBestSolution(), ground_truth);                
+            // Clustering indexes
+            if(SAVE_FILE) {
+                writer_output << fixed << setprecision(4) << eval->CRand() << " ";
+                writer_output << fixed << setprecision(4) << eval->Nmi() << " ";
+                writer_output << fixed << setprecision(4) << eval->CentroidIndex();
+            }
+            delete eval;
+            delete ground_truth;
+        }
+    }
+    if(SAVE_FILE) {
+        writer_output << "\n";
+        writer_output.close();
+    }
+}
+
 void Run(int seed, string fileData, Param prm, int m) {
     srand(seed);
 
@@ -22,7 +84,7 @@ void Run(int seed, string fileData, Param prm, int m) {
         return;
     }
     
-    // Read the parameters
+    // Read number of points and dimensionality of data
     int n, d;
     input >> n;
     input >> d;
@@ -40,14 +102,14 @@ void Run(int seed, string fileData, Param prm, int m) {
         return;
     }
 
+    fileData = ReplaceString(fileData, DATA_PATH, "");
+    fileData = ReplaceString(fileData, ".txt", "");
+
     // Create an instance of PbData
-    PbData pb_data(x->data, x->n, x->d, m);
+    PbData pb_data(fileData, x->data, x->n, x->d, m);
 
     ofstream writer_output;
     stringstream filename_output;
-
-    fileData = ReplaceString(fileData, DATA_PATH, "");
-    fileData = ReplaceString(fileData, ".txt", "");
 
     filename_output << "out/" << fileData << '_' <<
                 setw(3) << setfill('0') << m << "_" <<
@@ -74,59 +136,9 @@ void Run(int seed, string fileData, Param prm, int m) {
         
         cout << fileData << " " << pb_data.GetM() << " " << genetic->GetBestSolution()->GetCost() << " " << elapsedSecs << endl;
         
-        if(SAVE_FILE) {
-            writer_output.open (filename_output.str().c_str(), ofstream::out | ofstream::app);  
-            writer_output << prm.size_population << " ";
-            writer_output << prm.max_it << " ";
-            writer_output << fileData << " ";
-            writer_output << m << " ";
-            writer_output << fixed << setprecision(10) << genetic->GetBestSolution()->GetCost() << " ";
-            writer_output << fixed << setprecision(4) << elapsedSecs << " ";
-        }
-        if(prm.eval) {
-            string fileLabels = CLASS_PATH + fileData + ".txt";
-            // Open the labels file
-            ifstream inputLabels(fileLabels.c_str());
-            if (! inputLabels) {
-                cerr << "Unable to open labels file: " << fileLabels << endl;
-                if(SAVE_FILE) {
-                    writer_output << "\n";
-                    writer_output.close();
-                }
-                return;
-            }
-            int max = 0;
-            unsigned short* y = new unsigned short[n];
-            for (int i = 0; i < n; ++i) {
-                inputLabels >> y[i];
-                y[i] = y[i] - 1; // Labels file starts from 1
-                if(y[i] > max)
-                    max = y[i];
-            }
-            if(max != m-1) {
-                cerr << "Number of labels does not match m" << endl;
-                if(SAVE_FILE) {
-                    writer_output << "\n";
-                    writer_output.close();
-                }
-                return;
-            } else {
-                Solution* ground_truth = new Solution(y, 0.0, pb_data);
-                Evaluator * eval = new Evaluator(pb_data, genetic->GetBestSolution(), ground_truth);                
-                // Clustering indexes
-                if(SAVE_FILE) {
-                    writer_output << fixed << setprecision(4) << eval->CRand() << " ";
-                    writer_output << fixed << setprecision(4) << eval->Nmi() << " ";
-                    writer_output << fixed << setprecision(4) << eval->CentroidIndex();
-                }
-                delete eval;
-                delete ground_truth;
-            }
-        }
-        if(SAVE_FILE) {
-            writer_output << "\n";
-            writer_output.close();
-        }
+        // Save output results 
+        SaveOutput(writer_output, filename_output, genetic, elapsedSecs);
+
         delete genetic;
     }
     delete x;

@@ -2,6 +2,9 @@
 #define PbData_H
 
 #include <iostream>
+#include <string>
+
+using namespace std;
 
 // Parameters of the problem
 struct Param {
@@ -35,6 +38,9 @@ class PbData {
     
     private:
 
+        // Instance (dataset) name
+        string instance_name;
+
         // Features vector: Represented as a linearized vector of size n x d
         double* data;
 
@@ -49,7 +55,8 @@ class PbData {
     
     public:
 
-        PbData(double* data, int n, int d, int m) {
+        PbData(string instance_name, double* data, int n, int d, int m) {
+            this->instance_name = instance_name;
             this->data = data;
             this->n = n;
             this->d = d;
@@ -59,6 +66,8 @@ class PbData {
         PbData() {};
 
         ~PbData() {};
+
+        string GetInstanceName() { return instance_name; };
 
         double* GetData() { return data; };
 

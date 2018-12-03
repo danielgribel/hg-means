@@ -58,6 +58,10 @@ class GeneticOperations {
 
         ~GeneticOperations();
 
+        PbData GetPbData() { return pb_data; };
+
+        Param GetParam() { return param; };
+
         // Get the population of solutions
         vector<Solution*> GetPopulation() { return population; };
 
