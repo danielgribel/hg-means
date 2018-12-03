@@ -51,8 +51,8 @@ void Run(int seed, string fileData, Param prm, int m) {
 
     filename_output << "out/" << fileData << '_' <<
                 setw(3) << setfill('0') << m << "_" <<
-                prm.sizePopulation << '_' <<
-                prm.maxIt << ".out";
+                prm.size_population << '_' <<
+                prm.max_it << ".out";
 
     // Clean file content if it already exists
     if(SAVE_FILE) {
@@ -60,7 +60,7 @@ void Run(int seed, string fileData, Param prm, int m) {
         writer_output.close();
     }
 
-    for(int i = 0; i < prm.nbRuns; i++) {
+    for(int i = 0; i < prm.nb_runs; i++) {
         clock_t begin = clock();
 
         // Create GeneticOperations instance
@@ -76,8 +76,8 @@ void Run(int seed, string fileData, Param prm, int m) {
         
         if(SAVE_FILE) {
             writer_output.open (filename_output.str().c_str(), ofstream::out | ofstream::app);  
-            writer_output << prm.sizePopulation << " ";
-            writer_output << prm.maxIt << " ";
+            writer_output << prm.size_population << " ";
+            writer_output << prm.max_it << " ";
             writer_output << fileData << " ";
             writer_output << m << " ";
             writer_output << fixed << setprecision(10) << genetic->GetBestSolution()->GetCost() << " ";
@@ -137,22 +137,25 @@ int main(int argc, char** argv) {
         Param parameters;
         int m;
         string fileName = argv[1];
-        parameters.sizePopulation = atoi(argv[2]);
-        parameters.maxIt = atoi(argv[3]);
+        parameters.size_population = atoi(argv[2]);
+        parameters.max_it = atoi(argv[3]);
         parameters.eval = atoi(argv[4]);
-        parameters.W = 2;
+        parameters.w = 2;
         parameters.mutation = 1;
-        parameters.nbRuns = 1;
-        parameters.maxPopulation = 2*parameters.sizePopulation;
-        parameters.itNoImprovement = parameters.maxIt/10;
-        if(parameters.itNoImprovement < 1) {
-            parameters.itNoImprovement = 1;
+        parameters.nb_runs = 1;
+        parameters.max_population = 2*parameters.size_population;
+        parameters.no_improvement_it = parameters.max_it/10;
+        if(parameters.no_improvement_it < 1) {
+            parameters.no_improvement_it = 1;
         }
         for(int i = 5; i < argc; i++) {
             m = atoi(argv[i]);
-            Run(16007, fileName, parameters, m);
+            if(m > 0 && m < 65535) {
+                Run(16007, fileName, parameters, m);
+            } else {
+                cerr << "The number of clusters is out of the limit [1, 65535]" << endl;
+            }
         }
-
     } catch (const exception& e) {
         cerr << e.what();
     }

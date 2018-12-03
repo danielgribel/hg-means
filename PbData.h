@@ -3,13 +3,14 @@
 
 #include <iostream>
 
+// Parameters of the problem
 struct Param {
-	int W;
-	int sizePopulation;
-    int maxPopulation;
-    int maxIt;
-    int itNoImprovement;
-    int nbRuns;
+	int w;
+	int size_population;
+    int max_population;
+    int max_it;
+    int no_improvement_it;
+    int nb_runs;
     bool mutation;
     bool eval;
 };
@@ -18,12 +19,16 @@ class PbData {
     
     private:
 
+        // Features vector: Represented as a linearized vector of size n x d
         double* data;
 
+        // Number of data points (samples)
         int n;
 
+        // Number of dimensions (features)
         int d;
 
+        // Number of clusters
         int m;
     
     public:

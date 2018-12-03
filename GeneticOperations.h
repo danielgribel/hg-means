@@ -19,20 +19,28 @@ class GeneticOperations {
     
     private:
 
+        // Population of solutions
         vector<Solution*> population;
 
+        // The best solution in the population
         Solution* best_solution;
 
+        // Problem data
         PbData pb_data;
 
+        // Problem parameters
         Param param;
 
+        // Get the minimum assignment between two centroids. Hungarian method of Dlib is used
         vector<long> MinAssignment(double** c1, double** c2);
         
+        // Generate a solution for MSSC with initial centers randomly chosen 
         unsigned short* GetKmeansAssignment(const Dataset* x);
-
+        
+        // Generate a solution for MSSC with initial centers chosen from K-means++ heuristic
         unsigned short* GetKppAssignment(const Dataset* x);
 
+        // Get the cardinalities (number of points) of clusters
         int* GetCardinality(int** clusterSize);
 
         void PushMax(vector< pair<double, int> >& heap, double cost, int val);
@@ -49,22 +57,31 @@ class GeneticOperations {
 
         vector<Solution*> GetPopulation() { return population; };
 
+        // Add solution to current population
         void AddSolution(Solution* solution) { population.push_back(solution); };
 
+        // Delete solution to current population
         void DeleteSolution(int i) { delete population[i]; };
 
+        // Get the MSSC cost of a solution
         double GetCost(int i) { return population[i]->GetCost(); }
 
+        // Get the alpha value of a solution
         double GetAlpha(int i) { return population[i]->GetAlpha(); }
 
+        // Get the assignment of a solution
         unsigned short* GetAssignment(int i) { return population[i]->GetAssignment(); }
 
+        // Parent selection: W-tournament selection among the solutions of the population
         Solution* SelectParent();
 
+        // Generate the initial population
         void CreateInitialPopulation(const Dataset* x);
 
+        // Select the survivor solutions for the next generation
         void SelectSurvivors(const Dataset* x);
 
+        // Perform exact minimum-cost matching crossover
         Solution* Crossover(Solution* p1, Solution* p2);
 
         Solution* GetBestSolution() { return best_solution; };

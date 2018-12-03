@@ -55,66 +55,68 @@ double Evaluator::CRand() {
 	return crandIndex;
 }
 
-// Get the Normalized mutual information indicator
+// Implemented by Carlo Nicolini
+// More information in the original repository: https://github.com/CarloNicolini/rnmi
 double Evaluator::Nmi() {
 	int n = pb_data.GetN();
 	unsigned short* pa = solution->GetAssignment();
 	unsigned short* pb = ground_truth->GetAssignment();
-	int qa=-1,qb=-1;
+	int qa = -1;
+	int qb = -1;
 	vector <int > ga;//group a
 	vector <int > gb;//group b
-	for(int i=0;i<n;i++){
-		if(qa<pa[i]) qa=pa[i];
-		if(qb<pb[i]) qb=pb[i];
+	for(int i = 0; i < n; i++) {
+		if(qa < pa[i]) qa = pa[i];
+		if(qb < pb[i]) qb = pb[i];
 	}
 	qa++;
 	qb++;
-	if(qa==1 && qb==1) return 0.0;
+	if(qa == 1 && qb == 1) return 0.0;
 	ga.resize(qa);
-	for(int q=0;q<qa;q++) ga[q]=0;
+	for(int q = 0; q < qa; q++) ga[q]=0;
 	gb.resize(qb);
-	for(int q=0;q<qb;q++) gb[q]=0;
+	for(int q = 0; q < qb; q++) gb[q]=0;
 
 	vector< vector<int> > A;
 	vector< vector<int> > B;
 	A.resize(qa); //existing structure
 	B.resize(qa); //counting structure
-	for(int i=0;i < n;i++){
-		int q=pa[i];
-		int t=pb[i];
+	for(int i = 0; i < n; i++) {
+		int q = pa[i];
+		int t = pb[i];
 		ga[q]++;
 		gb[t]++;
-		int idx=-1;
-		for(int j=0;j<A[q].size();j++){
+		int idx = -1;
+		for(int j = 0; j < A[q].size(); j++) {
 			if(A[q][j] == t) {
 				idx=j;
 				break;
 			}
 		}
-		if(idx == -1){//pair [x y] did not show up
+		if(idx == -1) {//pair [x y] did not show up
 			A[q].push_back(t);
 			B[q].push_back(1);
-		}else{// [x y] is there
+		} else {// [x y] is there
 			B[q][idx] += 1;
 		}
 	}
-	double Ha=0;
-	for(int q=0;q<qa;q++){
-		if(ga[q]==0) continue;
-		double prob=1.0*ga[q]/n;
+	double Ha = 0;
+	for(int q = 0; q < qa; q++) {
+		if(ga[q] == 0) continue;
+		double prob = 1.0*ga[q]/n;
 		Ha += prob*log(prob);
 	}
 	double Hb=0;
-	for(int q=0;q<qb;q++){
-		if(gb[q]==0) continue;
-		double prob=1.0*gb[q]/n;
+	for(int q = 0; q < qb; q++) {
+		if(gb[q] == 0) continue;
+		double prob = 1.0*gb[q]/n;
 		Hb += prob*log(prob);
 	}
 	double Iab=0;
-	for(int q=0;q<qa;q++){
-		for(int idx=0;idx<A[q].size();idx++){
-			double prob=1.0*B[q][idx]/n;
-			int t=A[q][idx];
+	for(int q = 0; q < qa; q++) {
+		for(int idx = 0; idx < A[q].size(); idx++) {
+			double prob = 1.0*B[q][idx]/n;
+			int t = A[q][idx];
 			Iab += prob*log(prob/ ( 1.0*ga[q]/n*gb[t]/n ));
 		}
 	}

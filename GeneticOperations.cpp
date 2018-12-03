@@ -15,7 +15,7 @@ Solution* GeneticOperations::SelectParent() {
     Solution* parent_solution = NULL;
     double best_cost = MathUtils::MAX_FLOAT;
     int r;
-    for(int i = 0; i < param.W; i++) {
+    for(int i = 0; i < param.w; i++) {
         r = rand() % population.size();
         if(GetCost(r) < best_cost) {
             parent_solution = population[r];
@@ -48,7 +48,7 @@ unsigned short* GeneticOperations::GetKppAssignment(const Dataset* x) {
 void GeneticOperations::CreateInitialPopulation(const Dataset* x) {
     Solution* best;
     double best_cost = MathUtils::MAX_FLOAT;
-    for(int i = 0; i < param.sizePopulation; i++) {
+    for(int i = 0; i < param.size_population; i++) {
         unsigned short* assignment = GetKmeansAssignment(x);    
         double alpha = 1.0;
         if(param.mutation) {
@@ -101,29 +101,24 @@ pair<double, int> GeneticOperations::FrontMax(vector< pair<double, int> >& heap)
     return heap.front();
 }
 
-// O(Max_Pop x n)
+// O(max_population x n)
 void GeneticOperations::SelectSurvivors(const Dataset* x) {
-    int n = pb_data.GetN();
     int m = pb_data.GetM();
     Hash* table = new Hash();
     int max_population = population.size();
     vector<Solution*> new_population;
     vector<int> discarded(max_population);
-    int id;
-    // HeapPdi* heap_individuals = new HeapPdi();
-    // HeapPdi* heap_clones = new HeapPdi(); 
-
     vector< pair<double, int> > heap_individuals;
     vector< pair<double, int> > heap_clones;
 
     Kmeans* algorithm = new HamerlyKmeans();
 
-    for(int i = 0; i < max_population; i++) { // O(maxPop x n)
+    // O(max_population x n)
+    for(int i = 0; i < max_population; i++) {
         algorithm->initialize(x, m, GetAssignment(i), 1); // O(m)
         int* card = GetCardinality(algorithm->getClusterSize()); // O(m)
         // Check if element is in hash: O(n) worst case
         if(table->Exist(card, GetCost(i), m)) {
-            // heap_clones->PushMax(GetCost(i), i);
             PushMax(heap_clones, GetCost(i), i);
             delete [] card;
         } else {
@@ -131,47 +126,38 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
             an_item.cost = GetCost(i);
             an_item.cardinality = card;
             table->Insert(an_item, m);
-            // heap_individuals->PushMax(GetCost(i), i);
             PushMax(heap_individuals, GetCost(i), i);
         }
         discarded[i] = 0;
     }
     delete algorithm;
     
+    int id;
     int j = 0;
     
-    // For the two whiles: O(maxPop - sizePop)
-    // while((j < (max_population- param.sizePopulation)) && (heap_clones->GetHeap().size() > 0)) {
-    while((j < (max_population- param.sizePopulation)) && (heap_clones.size() > 0)) {
-        // id = heap_clones->FrontMax().second;
-        // heap_clones->PopMax();
+    // For the two whiles: O(max_population - sizePopulation)
+    while((j < (max_population- param.size_population)) && (heap_clones.size() > 0)) {
         id = FrontMax(heap_clones).second;
         PopMax(heap_clones);
         discarded[id] = 1;
         j++;
     }
 
-    while(j < (max_population - param.sizePopulation)) {
-        // id = heap_individuals->FrontMax().second;
-        // heap_individuals->PopMax();
+    while(j < (max_population - param.size_population)) {
         id = FrontMax(heap_individuals).second;
         PopMax(heap_individuals);
         discarded[id] = 1;
         j++;
     }
 
-    for(int i = 0; i < max_population; i++) { // O(maxPop)
+    for(int i = 0; i < max_population; i++) { // O(max_population)
         if(discarded[i] == 0) {
             new_population.push_back(population[i]);
         } else {
             delete population[i];
         }
     }
-    
-    // delete heap_individuals;
-    // delete heap_clones;
     delete table;
-
     population = new_population;
 }
 
@@ -185,19 +171,17 @@ vector<long> GeneticOperations::MinAssignment(double** c1, double** c2) { //O(m^
             cost(i,j) = -1.0 * MathUtils::SquaredEuclidean(c1[i], c2[j], d);
         }
     }
-    std::vector<long> assignment = max_cost_assignment(cost);
+    vector<long> assignment = max_cost_assignment(cost);
     return assignment;
 }
 
 Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2) {
-    int n = pb_data.GetN();
     int d = pb_data.GetD();
     int m = pb_data.GetM();
     double alpha = 0.5 * (p1->GetAlpha() + p2->GetAlpha());
     double** c1 = p1->GetCentroids();
     double** c2 = p2->GetCentroids();
     double** c3 = new double* [m];
-    
     for(int i = 0; i < m; i++) {
         c3[i] = new double[d];
     }
@@ -215,9 +199,9 @@ Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2) {
             }
         }
     }
-    Solution* off = new Solution(c3, alpha, pb_data);
-    off->Repair();
-    return off;
+    Solution* offspring = new Solution(c3, alpha, pb_data);
+    offspring->Repair();
+    return offspring;
 }
 
 void GeneticOperations::HGMeans(const Dataset* x) {
@@ -228,7 +212,7 @@ void GeneticOperations::HGMeans(const Dataset* x) {
     CreateInitialPopulation(x);
 
     // Genetic algorithm general loop
-	while(((it-last_improvement) < param.itNoImprovement) && (it < param.maxIt)) {
+	while(((it-last_improvement) < param.no_improvement_it) && (it < param.max_it)) {
 
         // Select parent solutions for mate
         Solution* p1 = SelectParent();
@@ -258,7 +242,7 @@ void GeneticOperations::HGMeans(const Dataset* x) {
         }
 
         // Select the survivors
-        if(population.size() > param.maxPopulation) {
+        if(population.size() > param.max_population) {
             SelectSurvivors(x);
         }
         it++;

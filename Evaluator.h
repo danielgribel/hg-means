@@ -19,8 +19,10 @@ class Evaluator {
 
         PbData pb_data;
 
+        // Clustering Solution produced by the algorithm
         Solution* solution;
 
+        // Clustering Solution representing the ground truth
         Solution* ground_truth;
 
         void CountRandCoefficients(int& a, int& b, int& c, int& d);
@@ -31,12 +33,16 @@ class Evaluator {
     
         ~Evaluator();
 
+        // Calculate the Rand indicator
         double Rand();
 
+        // Calculate the C-Rand indicator
         double CRand();
 
+        // Calculate the Normalized mutual information indicator
         double Nmi();
 
+        // Calculate the Centroid Index indicator
         double CentroidIndex();
 };
 
