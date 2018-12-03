@@ -3,6 +3,17 @@
 
 #include <iostream>
 
+struct Param {
+	int W;
+	int sizePopulation;
+    int maxPopulation;
+    int maxIt;
+    int itNoImprovement;
+    int nbRuns;
+    bool mutation;
+    bool eval;
+};
+
 class PbData {
     
     private:
@@ -17,8 +28,6 @@ class PbData {
     
     public:
 
-        PbData();
-        
         PbData(double* data, int n, int d, int m) {
             this->data = data;
             this->n = n;
@@ -26,7 +35,9 @@ class PbData {
             this->m = m;
         };
 
-        ~PbData();
+        PbData() {};
+
+        ~PbData() {};
 
         double* GetData() { return data; };
 
