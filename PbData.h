@@ -1,12 +1,16 @@
 #ifndef PbData_H
 #define PbData_H
 
+/* Authors: Daniel Gribel and Thibaut Vidal
+ * Contact: dgribel@inf.puc-rio.br
+ */
+
 #include <iostream>
 #include <string>
 
 using namespace std;
 
-// Parameters of the problem
+// Stores the parameters of the problem
 struct Param {
 
     // Size of Tournament selection for parents mate
@@ -34,6 +38,9 @@ struct Param {
     bool eval;
 };
 
+/* PbData stores the information of the problem: instance name, features vector,
+ * number of data points, number of dimensions, and number of clusters
+ */
 class PbData {
     
     private:

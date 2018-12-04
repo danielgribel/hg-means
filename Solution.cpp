@@ -31,7 +31,7 @@ Solution::Solution(vector< vector<double> > centroids, double alpha, PbData pb_d
 }
 
 Solution::~Solution() {
-    DeleteAssignment();
+    delete [] assignment;
 }
 
 void Solution::AssignmentToCentroids() { // O(nd)
@@ -242,5 +242,5 @@ void Solution::InitAssignment() {
 void Solution::InitCentroids() {
     int d = pb_data.GetD();
     int m = pb_data.GetM();
-    centroids = vector< vector<double> > (m, vector<double>(d,0.0));
+    centroids = vector< vector<double> > (m, vector<double>(d, 0.0));
 }

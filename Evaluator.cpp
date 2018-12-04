@@ -61,8 +61,8 @@ double Evaluator::Nmi() {
 	unsigned short* pb = ground_truth->GetAssignment();
 	int qa = -1;
 	int qb = -1;
-	vector <int > ga;//group a
-	vector <int > gb;//group b
+	vector <int > ga; // Group A
+	vector <int > gb; // Group B
 	for(int i = 0; i < n; i++) {
 		if(qa < pa[i]) qa = pa[i];
 		if(qb < pb[i]) qb = pb[i];

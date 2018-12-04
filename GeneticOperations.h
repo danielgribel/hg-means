@@ -1,6 +1,13 @@
 #ifndef GeneticOperations_H
 #define GeneticOperations_H
 
+/* Authors: Daniel Gribel and Thibaut Vidal
+ * Contact: dgribel@inf.puc-rio.br
+ *
+ * Class dedicated to operators related to the Genetic Algorithm,
+ * such as the Crossover, the Selection of survivors and the general genetic loop
+ */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -22,7 +29,7 @@ class GeneticOperations {
         // Population of solutions
         vector<Solution*> population;
 
-        // The best solution in the population
+        // The best solution in population
         Solution* best_solution;
 
         // Problem data
@@ -71,13 +78,13 @@ class GeneticOperations {
         // Delete solution to current population
         void DeleteSolution(int i) { delete population[i]; };
 
-        // Get the MSSC cost of a solution
+        // Get the MSSC cost of the i-th solution in population
         double GetCost(int i) { return population[i]->GetCost(); }
 
-        // Get the alpha value of a solution
+        // Get the alpha value of the i-th solution in population
         double GetAlpha(int i) { return population[i]->GetAlpha(); }
 
-        // Get the assignment of a solution
+        // Get the assignment of the i-th solution in population
         unsigned short* GetAssignment(int i) { return population[i]->GetAssignment(); }
 
         // Parent selection: W-tournament selection among the solutions of the population
@@ -90,7 +97,9 @@ class GeneticOperations {
         void SelectSurvivors(const Dataset* x);
 
         // Perform exact minimum-cost matching crossover
-        Solution* Crossover(Solution* p1, Solution* p2);
+        // Solution* Crossover(Solution* p1, Solution* p2);
+
+        Solution* Crossover(Solution* p1, Solution* p2, const Dataset* x);
 
         // Get the best solution of the population -- in terms of MSSC objective
         Solution* GetBestSolution() { return best_solution; };

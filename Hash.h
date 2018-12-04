@@ -1,6 +1,10 @@
 #ifndef Hash_h
 #define Hash_h
 
+/* Authors: Daniel Gribel and Thibaut Vidal
+ * Contact: dgribel@inf.puc-rio.br
+ */
+
 #include <iostream>
 #include <string>
 #include <algorithm>

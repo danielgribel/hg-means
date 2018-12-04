@@ -1,6 +1,13 @@
 #ifndef Evaluator_H
 #define Evaluator_H
 
+/* Authors: Daniel Gribel and Thibaut Vidal
+ * Contact: dgribel@inf.puc-rio.br
+ *
+ * Class dedicated to compute external clustering measures, such as
+ * Rand, C-Rand, Normalized Mutal Information, and Centroid Index
+ */
+
 #include <iostream>
 #include <stdlib.h>
 #include <vector>
@@ -20,10 +27,10 @@ class Evaluator {
         // Problem Data
         PbData pb_data;
 
-        // Clustering Solution produced by the algorithm
+        // Clustering solution produced by the algorithm
         Solution* solution;
 
-        // Clustering Solution representing the ground truth
+        // Clustering solution representing the ground truth
         Solution* ground_truth;
 
         // Count coefficients for Rand and C-Rand indicators

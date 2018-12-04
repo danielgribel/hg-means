@@ -5,11 +5,11 @@ using namespace std;
 namespace MathUtils {
     
     int FindIndex(vector<double> values, double key, int first, int last) {
-        if(values[first] <= key && values[first+1] >= key) {
+        if(values[first] <= key && values[first + 1] >= key) {
             return first;
         }
 
-        int imid = first + (last-first)/2;
+        int imid = first + (last - first)/2;
 
         if(first == last || imid == first) {
             return -1;
@@ -43,19 +43,11 @@ namespace MathUtils {
         return dist;
     }
 
-    // Get the distance between a data point and a centroid
-    double PointCenterDist(int p, vector<double> center, int d, double *data) {
+    double PointCenterDist(int p, vector<double> center, int d, double *data) { // O(d)
         double dist = 0.0;
         for(int i = 0; i < d; i++) {
             dist = dist + ( (data[p*d+i] - center[i])*(data[p*d+i] - center[i]) );
         }
         return dist;
-    }
-
-    void DeleteMatrix(double** matrix, int m) {
-        for(int i = 0; i < m; i++) {
-            delete [] matrix[i];
-        }
-        delete [] matrix;
     }
 }

@@ -1,6 +1,12 @@
 #ifndef MathUtils_h
 #define MathUtils_h
 
+/* Authors: Daniel Gribel and Thibaut Vidal
+ * Contact: dgribel@inf.puc-rio.br
+ *
+ * Utility class for general functions
+ */
+
 #include <stdlib.h>
 #include <string>
 #include <limits>
@@ -22,7 +28,7 @@ namespace MathUtils {
     // Generate a random number within the given range
     double RandBetween(double min, double max);
 
-    // Probability of a data point to be selected in mutation, given:
+    // Probability that a data point is selected in mutation, given:
     //  -- the current distance to its centroid
     //  -- the sum of distances from all points to their centroids
     //  -- weight alpha
@@ -34,7 +40,7 @@ namespace MathUtils {
     // Squared Euclidean distance of two general data points in R^d
     double SquaredEuclidean(vector<double> a, vector<double> b, int d);
 
-    // Squared Euclidean distance of a point (given by index in dataset) to a centroid
+    // Squared Euclidean distance of a point (given by its index in the dataset) to a centroid
     double PointCenterDist(int p, vector<double> center, int d, double* data);
 }
 

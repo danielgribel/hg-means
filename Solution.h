@@ -1,5 +1,16 @@
+
 #ifndef Solution_H
 #define Solution_H
+
+/* Authors: Daniel Gribel and Thibaut Vidal
+ * Contact: dgribel@inf.puc-rio.br
+ *
+ * The Solution class represents a clustering solution. It can be expressed by two representations:
+ * (i) assignment: specifies for each sample the index of the cluster with which it is associated;
+ * (ii) centroids: represents the coordinates of the center of each cluster.
+ * A Solution object also stores the cost of the solution (in terms of MSSC objective),
+ * the mutation parameter alpha and a reference to problem data
+ */
 
 #include <iostream>
 #include <vector>
@@ -32,10 +43,7 @@ class Solution {
         // Problem Data
         PbData pb_data;
 
-        // Calculate the centroids representation of a solution (assignment representation supposed to exist)
-        void AssignmentToCentroids();
-
-        // Calculate the assignment representation of a solution (centroids representation supposed to exist)
+        // Generate the assignment representation of a solution (centroids representation supposed to exist)
         void CentroidsToAssignment();
 
         // Initialize assignment data structure
@@ -43,9 +51,6 @@ class Solution {
 
         // Initialize centroids data structure
         void InitCentroids();
-
-        // Assignment free memory
-        void DeleteAssignment() { delete [] assignment; };
 
     public:
         
@@ -60,7 +65,8 @@ class Solution {
 
         // Constructor in which we know solution centroids
         Solution(vector< vector<double> > centroids, double alpha, PbData pb_data);
-
+        
+        // Assignment free memory
         ~Solution();
 
         // Get the assignment representation
@@ -72,8 +78,10 @@ class Solution {
         // Get especific centroid 
         vector<double> GetCentroids(int i) { return centroids[i]; };
 
+        // Get solution cost (in terms of MSSC objective)
         double GetCost() { return cost; }
 
+        // Get alpha parameter
         double GetAlpha() { return alpha; }
 
         // Mutate the solution
@@ -87,6 +95,9 @@ class Solution {
 
         // Repair the solution if it is degenerated (less than m clusters)
         void Repair();
+
+        // Generate the centroids representation of a solution (assignment representation supposed to exist)
+        void AssignmentToCentroids();
 };
 
 #endif

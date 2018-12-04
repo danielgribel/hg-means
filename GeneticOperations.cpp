@@ -135,7 +135,7 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
     int j = 0;
     
     // For the two whiles: O(max_population - size_population)
-    while((j < (max_population- param.size_population)) && (heap_clones.size() > 0)) {
+    while((j < (max_population - param.size_population)) && (heap_clones.size() > 0)) {
         id = FrontMax(heap_clones).second;
         PopMax(heap_clones);
         discarded[id] = 1;
@@ -174,10 +174,11 @@ vector<long> GeneticOperations::MinAssignment(vector< vector<double> > c1, vecto
     return assignment;
 }
 
-Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2) {
+Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2, const Dataset* x) {
     int d = pb_data.GetD();
     int m = pb_data.GetM();
     double alpha = 0.5 * (p1->GetAlpha() + p2->GetAlpha());
+
     vector< vector<double> > c1 = p1->GetCentroids();
     vector< vector<double> > c2 = p2->GetCentroids();
     vector< vector<double> > c3 (m, vector<double>(d));
@@ -215,14 +216,14 @@ void GeneticOperations::HGMeans(const Dataset* x) {
         Solution* p2 = SelectParent();
 
         // Apply the crossover
-        Solution* current_solution = Crossover(p1, p2);
-        
+        Solution* current_solution = Crossover(p1, p2, x);
+
         // Mutate mutation factor
         if(param.mutation) {
             current_solution->MutateAlpha();
         }
 
-        // Apply the mutation
+        // Apply the mutation mutation
         current_solution->Mutate();
 
         // Perform local search (K-means)
