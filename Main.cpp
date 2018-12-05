@@ -3,7 +3,7 @@
  */
 
 #include "GeneticOperations.h"
-#include "Evaluator.h"
+// #include "Evaluator.h"
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -15,62 +15,28 @@ using namespace std;
 #define DATA_PATH "data/"
 #define CLASS_PATH "labels/"
 
-void SaveOutput(ofstream& writer_output, stringstream& filename_output, GeneticOperations* genetic, double elapsedSecs) {
+void SaveOutput(ofstream& writer_output, stringstream& filename_output, GeneticOperations* genetic, Solution* ground_truth, double elapsedSecs) {
     Param prm = genetic->GetParam();
-    PbData pb_data = genetic->GetPbData();
-    int n = pb_data.GetN();
-    int m = pb_data.GetM();
-    string instance = pb_data.GetInstanceName();
-    Evaluator* eval;
-    Solution* ground_truth;
-
+    int m = genetic->GetPbData().GetM();
+    string instance = genetic->GetPbData().GetInstanceName();
+    Solution* solution = genetic->GetBestSolution();
+    
+    writer_output.open (filename_output.str().c_str(), ofstream::out | ofstream::app);  
+    writer_output << prm.size_population << " ";
+    writer_output << prm.max_it << " ";
+    writer_output << instance << " ";
+    writer_output << m << " ";
+    writer_output << fixed << setprecision(10) << solution->GetCost() << " ";
+    writer_output << fixed << setprecision(4) << elapsedSecs;
+    // Attach clustering indexes to output
     if(prm.eval) {
-        string file_labels = CLASS_PATH + instance + ".txt";
-        // Open the labels file
-        ifstream inputLabels(file_labels.c_str());
-        if (! inputLabels) {
-            cerr << "Unable to open labels file: " << file_labels << endl;
-            prm.eval = false;
-        } else {
-            int max = 0;
-            unsigned short* y = new unsigned short[n];
-            for (int i = 0; i < n; ++i) {
-                inputLabels >> y[i];
-                y[i] = y[i] - 1; // Labels file starts from 1
-                if(y[i] > max)
-                    max = y[i];
-            }
-            // Verify if labels file is valid
-            if(max != m-1) {
-                cerr << "Number of labels does not match m" << endl;
-                prm.eval = false;
-            } else {
-                ground_truth = new Solution(y, 0.0, pb_data);
-                eval = new Evaluator(pb_data, genetic->GetBestSolution(), ground_truth);
-            }
-        }
+        writer_output << " ";
+        writer_output << fixed << setprecision(4) << solution->CRand(ground_truth) << " ";
+        writer_output << fixed << setprecision(4) << solution->Nmi(ground_truth) << " ";
+        writer_output << fixed << setprecision(4) << solution->CentroidIndex(ground_truth);
     }
-
-    if(SAVE_FILE) {
-        writer_output.open (filename_output.str().c_str(), ofstream::out | ofstream::app);  
-        writer_output << prm.size_population << " ";
-        writer_output << prm.max_it << " ";
-        writer_output << instance << " ";
-        writer_output << m << " ";
-        writer_output << fixed << setprecision(10) << genetic->GetBestSolution()->GetCost() << " ";
-        writer_output << fixed << setprecision(4) << elapsedSecs;
-        // Attach clustering indexes to output
-        if(prm.eval) {
-            writer_output << " ";
-            writer_output << fixed << setprecision(4) << eval->CRand() << " ";
-            writer_output << fixed << setprecision(4) << eval->Nmi() << " ";
-            writer_output << fixed << setprecision(4) << eval->CentroidIndex();
-            delete eval;
-            delete ground_truth;
-        }
-        writer_output << "\n";
-        writer_output.close();
-    }
+    writer_output << "\n";
+    writer_output.close();
 }
 
 void Run(int seed, string file_data, Param prm, int m) {
@@ -121,6 +87,37 @@ void Run(int seed, string file_data, Param prm, int m) {
         writer_output.close();
     }
 
+    // Try to obtain ground truth labels -- open file, load labels, etc
+    // If successful, create a ground truth solution; else set prm.eval=False
+    string instance = pb_data.GetInstanceName();
+    Solution* ground_truth;
+
+    if(prm.eval) {
+        string file_labels = CLASS_PATH + instance + ".txt";
+        // Open the labels file
+        ifstream inputLabels(file_labels.c_str());
+        if (! inputLabels) {
+            cerr << "Unable to open labels file: " << file_labels << endl;
+            prm.eval = false;
+        } else {
+            int max = 0;
+            unsigned short* y = new unsigned short[n];
+            for (int i = 0; i < n; ++i) {
+                inputLabels >> y[i];
+                y[i] = y[i] - 1; // Labels file starts from 1
+                if(y[i] > max)
+                    max = y[i];
+            }
+            // Verify if labels file is valid
+            if(max != m-1) {
+                cerr << "Number of labels does not match m" << endl;
+                prm.eval = false;
+            } else {
+                ground_truth = new Solution(y, 0.0, pb_data);
+            }
+        }
+    }
+
     for(int i = 0; i < prm.nb_runs; i++) {
         clock_t begin = clock();
 
@@ -135,10 +132,15 @@ void Run(int seed, string file_data, Param prm, int m) {
         
         cout << file_data << " " << pb_data.GetM() << " " << genetic->GetBestSolution()->GetCost() << " " << elapsedSecs << endl;
         
-        // Save output results 
-        SaveOutput(writer_output, filename_output, genetic, elapsedSecs);
+        if(SAVE_FILE) {
+            // Save output results 
+            SaveOutput(writer_output, filename_output, genetic, ground_truth, elapsedSecs);
+        }
 
         delete genetic;
+    }
+    if(prm.eval) {
+        delete ground_truth;
     }
     delete x;
 }

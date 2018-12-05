@@ -244,3 +244,139 @@ void Solution::InitCentroids() {
     int m = pb_data.GetM();
     centroids = vector< vector<double> > (m, vector<double>(d, 0.0));
 }
+
+void Solution::CountRandCoefficients(Solution* ground_truth, int& a, int& b, int& c, int& d) {
+	a = 0;
+	b = 0;
+	c = 0;
+	d = 0;
+
+	unsigned short* y = ground_truth->GetAssignment();
+
+	for(int i = 0; i < pb_data.GetN(); i++) {
+		for(int j = i+1; j < pb_data.GetN(); j++) {
+			if( (assignment[i] == assignment[j]) && (y[i] == y[j]) ) {
+				a++;
+			}
+			if( (assignment[i] == assignment[j]) && (y[i] != y[j]) ) {
+				b++;
+			}
+			if( (assignment[i] != assignment[j]) && (y[i] == y[j]) ) {
+				c++;
+			}
+			if( (assignment[i] != assignment[j]) && (y[i] != y[j]) ) {
+				d++;
+			}
+		}
+	}
+}
+
+double Solution::Rand(Solution* ground_truth) {
+	int a, b, c, d;
+	CountRandCoefficients(ground_truth, a, b, c, d);
+	double randIndex = 1.0*(a + d)/(a + b + c + d);
+	return randIndex;
+}
+
+double Solution::CRand(Solution* ground_truth) {
+	int a, b, c, d;
+	CountRandCoefficients(ground_truth, a, b, c, d);
+	int total = a + b + c + d;
+	double crandIndex = (a - (1.0*(b + a)*(c + a))/total)/((1.0*(b + a + c + a))/2 - (1.0*(b + a)*(c + a))/total);
+	return crandIndex;
+}
+
+// Implemented by @Carlo Nicolini
+// More information in the original repository: https://github.com/CarloNicolini/rnmi
+double Solution::Nmi(Solution* ground_truth) {
+	int n = pb_data.GetN();
+	unsigned short* pa = assignment;
+	unsigned short* pb = ground_truth->GetAssignment();
+	int qa = -1;
+	int qb = -1;
+	vector <int > ga; // Group A
+	vector <int > gb; // Group B
+	for(int i = 0; i < n; i++) {
+		if(qa < pa[i]) qa = pa[i];
+		if(qb < pb[i]) qb = pb[i];
+	}
+	qa++;
+	qb++;
+	if(qa == 1 && qb == 1) return 0.0;
+	ga.resize(qa);
+	for(int q = 0; q < qa; q++) ga[q]=0;
+	gb.resize(qb);
+	for(int q = 0; q < qb; q++) gb[q]=0;
+
+	vector< vector<int> > A;
+	vector< vector<int> > B;
+	A.resize(qa); // Existing structure
+	B.resize(qa); // Counting structure
+	for(int i = 0; i < n; i++) {
+		int q = pa[i];
+		int t = pb[i];
+		ga[q]++;
+		gb[t]++;
+		int idx = -1;
+		for(int j = 0; j < A[q].size(); j++) {
+			if(A[q][j] == t) {
+				idx=j;
+				break;
+			}
+		}
+		if(idx == -1) { // Pair [x y] did not show up
+			A[q].push_back(t);
+			B[q].push_back(1);
+		} else { // [x y] is there
+			B[q][idx] += 1;
+		}
+	}
+	double Ha = 0;
+	for(int q = 0; q < qa; q++) {
+		if(ga[q] == 0) continue;
+		double prob = 1.0*ga[q]/n;
+		Ha += prob*log(prob);
+	}
+	double Hb=0;
+	for(int q = 0; q < qb; q++) {
+		if(gb[q] == 0) continue;
+		double prob = 1.0*gb[q]/n;
+		Hb += prob*log(prob);
+	}
+	double Iab=0;
+	for(int q = 0; q < qa; q++) {
+		for(int idx = 0; idx < A[q].size(); idx++) {
+			double prob = 1.0*B[q][idx]/n;
+			int t = A[q][idx];
+			Iab += prob*log(prob/ ( 1.0*ga[q]/n*gb[t]/n ));
+		}
+	}
+	return -2.0*Iab/(Ha+Hb);
+}
+
+double Solution::CentroidIndex(Solution* ground_truth) {
+	int d = pb_data.GetD();
+	int m = pb_data.GetM();
+	double dist, cmin;
+	vector<int> orphan(m, 1);
+	
+	for(int i = 0; i < m; i++) {
+		double mindist = MAX_FLOAT;
+		for(int j = 0; j < m; j++) {
+			dist = SquaredEuclidean(centroids[i], ground_truth->GetCentroids(j), d);
+			if(dist < mindist) {
+				mindist = dist;
+				cmin = j;
+			}
+		}
+		orphan[cmin] = 0;
+	}
+
+	double ci = 0.0;
+
+	for(int i = 0; i < m; i++) {
+		ci = ci + orphan[i];
+	}
+
+	return ci;
+}

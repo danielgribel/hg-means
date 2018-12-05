@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <vector>
+#include <math.h>
 #include "hamerly/dataset.h"
 #include "hamerly/hamerly_kmeans.h"
 #include "MathUtils.h"
@@ -52,6 +53,9 @@ class Solution {
         // Initialize centroids data structure
         void InitCentroids();
 
+        // Count coefficients for Rand and C-Rand indicators
+        void CountRandCoefficients(Solution* ground_truth, int& a, int& b, int& c, int& d);
+
     public:
         
         // Constructor in which we know solution assignment and cost 
@@ -65,7 +69,7 @@ class Solution {
 
         // Constructor in which we know solution centroids
         Solution(vector< vector<double> > centroids, double alpha, PbData pb_data);
-        
+
         // Assignment free memory
         ~Solution();
 
@@ -98,6 +102,20 @@ class Solution {
 
         // Generate the centroids representation of a solution (assignment representation supposed to exist)
         void AssignmentToCentroids();
+
+        /* External Clustering measures */
+
+        // Calculate the Rand indicator
+        double Rand(Solution* ground_truth);
+
+        // Calculate the C-Rand indicator
+        double CRand(Solution* ground_truth);
+
+        // Calculate the Normalized mutual information indicator
+        double Nmi(Solution* ground_truth);
+
+        // Calculate the Centroid Index indicator
+        double CentroidIndex(Solution* ground_truth);
 };
 
 #endif
