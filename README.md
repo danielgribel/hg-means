@@ -41,6 +41,9 @@ After the execution of the algorithm, output files will be saved in `/out` folde
 - LABELS files: The content of a labels file exhibits the cluster of each sample of the dataset according to ground-truth, where y_i correspond to the label of the i-th sample:
 
 | y_1 |
+
 | y_2 |
+
 | ... |
+
 | y_n |
