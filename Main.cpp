@@ -3,7 +3,6 @@
  */
 
 #include "GeneticOperations.h"
-// #include "Evaluator.h"
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -88,15 +87,14 @@ void Run(int seed, string file_data, Param prm, int m) {
     }
 
     // Try to obtain ground truth labels -- open file, load labels, etc
-    // If successful, create a ground truth solution; else set prm.eval=False
+    // If successful, create a ground truth solution; else, set prm.eval=False
     string instance = pb_data.GetInstanceName();
     Solution* ground_truth;
 
     if(prm.eval) {
         string file_labels = CLASS_PATH + instance + ".txt";
-        // Open the labels file
         ifstream inputLabels(file_labels.c_str());
-        if (! inputLabels) {
+        if (! inputLabels) { // Verify if labels file was successfully loaded
             cerr << "Unable to open labels file: " << file_labels << endl;
             prm.eval = false;
         } else {
@@ -108,10 +106,10 @@ void Run(int seed, string file_data, Param prm, int m) {
                 if(y[i] > max)
                     max = y[i];
             }
-            // Verify if labels file is valid
-            if(max != m-1) {
+            if(max != m-1) { // Verify if labels file is valid
                 cerr << "Number of labels does not match m" << endl;
                 prm.eval = false;
+                delete [] y;
             } else {
                 ground_truth = new Solution(y, 0.0, pb_data);
             }
@@ -136,7 +134,6 @@ void Run(int seed, string file_data, Param prm, int m) {
             // Save output results 
             SaveOutput(writer_output, filename_output, genetic, ground_truth, elapsedSecs);
         }
-
         delete genetic;
     }
     if(prm.eval) {

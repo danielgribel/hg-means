@@ -97,9 +97,7 @@ class GeneticOperations {
         void SelectSurvivors(const Dataset* x);
 
         // Perform exact minimum-cost matching crossover
-        // Solution* Crossover(Solution* p1, Solution* p2);
-
-        Solution* Crossover(Solution* p1, Solution* p2, const Dataset* x);
+        Solution* Crossover(Solution* p1, Solution* p2);
 
         // Get the best solution of the population -- in terms of MSSC objective
         Solution* GetBestSolution() { return best_solution; };

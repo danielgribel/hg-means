@@ -174,7 +174,7 @@ vector<long> GeneticOperations::MinAssignment(vector< vector<double> > c1, vecto
     return assignment;
 }
 
-Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2, const Dataset* x) {
+Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2) {
     int d = pb_data.GetD();
     int m = pb_data.GetM();
     double alpha = 0.5 * (p1->GetAlpha() + p2->GetAlpha());
@@ -216,7 +216,7 @@ void GeneticOperations::HGMeans(const Dataset* x) {
         Solution* p2 = SelectParent();
 
         // Apply the crossover
-        Solution* current_solution = Crossover(p1, p2, x);
+        Solution* current_solution = Crossover(p1, p2);
 
         // Mutate mutation factor
         if(param.mutation) {

@@ -240,9 +240,7 @@ void Solution::InitAssignment() {
 }
 
 void Solution::InitCentroids() {
-    int d = pb_data.GetD();
-    int m = pb_data.GetM();
-    centroids = vector< vector<double> > (m, vector<double>(d, 0.0));
+    centroids = vector< vector<double> > (pb_data.GetM(), vector<double>(pb_data.GetD(), 0.0));
 }
 
 void Solution::CountRandCoefficients(Solution* ground_truth, int& a, int& b, int& c, int& d) {
