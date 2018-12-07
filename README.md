@@ -6,7 +6,7 @@ Original files and complete source code of Greg Hamerly K-means can be found at:
 
 # Related Article
 
-"HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering"
+"HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering". Technical Report PUC-Rio -- arXiv 1804.09813. Gribel, D.; Vidal, T.
 
 https://arxiv.org/abs/1804.09813
 
@@ -26,3 +26,19 @@ To run the algorithm, try the following sequence of commands:
 `> ./hgmeans.sh`
 
 After the execution of the algorithm, output files will be saved in `/out` folder.
+
+# Data format
+
+Datasets: In the first line of a dataset file, the number of data points (n) and the dimensionality of the data (d) is set, separated by a single space. The remaining lines correspond to the coordinates of data points. Each line contains the values of the d features of a sample, where x_ij correspond to the j-th feature of the i-th sample of the data. Each feature value is separated by a single space, as depicted in the scheme below:
+
+===========================
+| n d                     |
+---------------------------
+| x_11 x_12 x_13 ... x_1d |
+---------------------------
+| x_21 x_22 x_23 ... x_2d |
+---------------------------
+| ...  ...  ...  ... ...  |
+---------------------------
+| x_n1 x_n2 x_n3 ... x_nd |
+===========================
