@@ -1,10 +1,11 @@
-# compile up to 8 things at once
+# Compile up to 8 things at once
 MAKEFLAGS = -j 8
 
 # Compiler options
 #CPPFLAGS = -Wall -Werror -pedantic
 CPPFLAGS += -g
 CPPFLAGS += -O3
+CPPFLAGS += -std=c++11
 #CPPFLAGS += -Wno-long-long
 
 # Enable code profiling
