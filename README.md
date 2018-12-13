@@ -30,18 +30,23 @@ After the execution of the algorithm, output files will be saved in `/out` folde
 In `hgmeans.sh` you can define the parameters of the algorithm:
 
 - Population size (default=10)
+
 `pi_min=10`
 
 - Maximum number of iterations (default=5000)
+
 `n2=5000`
 
 - Clustering evaluation (default=1)
+
 `evaluate=1`
 
 Then the `exec.sh` script is called with the following list of parameters:
+
 `./exec.sh "[Dataset Path] [$pi_min] [$n2] [$evaluate] [List of the number of clusters]"`
 
 Example:
+
 `./exec.sh "data/fisher.txt $pi_min $n2 $evaluate 2 5 10"`
 
 This script executes HG-means algorithm for "fisher" dataset, with 2, 5 and 10 clusters
