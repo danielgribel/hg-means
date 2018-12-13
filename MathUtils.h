@@ -14,6 +14,24 @@
 
 using namespace std;
 
+struct Item {
+    double cost;
+    vector<int> cardinality;
+};
+
+template<class Item> class Hash {
+    public:
+        size_t operator()(Item &s) const {
+            sort(s.cardinality.begin(), s.cardinality.end());
+            size_t seed = 0;
+            for(int i = 0; i < s.cardinality.size(); i++) {
+                // seed ^= s.cardinality[i] + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+                seed = seed + (i+1)*s.cardinality[i];
+            }
+            return hash<string>()(to_string(s.cost)) ^ seed;
+        }
+};
+
 namespace MathUtils {
 	
     // Infinite float
