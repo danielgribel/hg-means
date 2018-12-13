@@ -27,17 +27,19 @@ To run the algorithm, try the following sequence of commands:
 
 After the execution of the algorithm, output files will be saved in `/out` folder.
 
+## Parameters of the algorithm
+
 In `hgmeans.sh` you can define the parameters of the algorithm:
 
-- Population size (default=10)
+Population size (default=10)
 
 `pi_min=10`
 
-- Maximum number of iterations (default=5000)
+Maximum number of iterations (default=5000)
 
 `n2=5000`
 
-- Clustering evaluation (default=1)
+Clustering evaluation (default=1)
 
 `evaluate=1`
 
