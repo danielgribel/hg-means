@@ -4,20 +4,20 @@ Source code of HG-means clustering, an efficient hybrid genetic algorithm propos
 
 Original files and complete source code of Greg Hamerly K-means can be found at: https://github.com/ghamerly/fast-kmeans
 
-# Related Article
+## Related Article
 
-"HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering". Technical Report PUC-Rio -- arXiv 1804.09813. Gribel, D.; Vidal, T.
+*HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering*. Technical Report PUC-Rio - arXiv 1804.09813. Gribel, D.; Vidal, T.
 
 https://arxiv.org/abs/1804.09813
 
-# Run
+## Run
 
 Firstly, make sure that the datasets are placed in `/data` folder.
 
 The program parameters as well as the input data should be defined in `hgmeans.sh` script,
 which executes the algorithm.
 
-Important: If the parameter `evaluate` -- for calculating external clustering measures -- is enabled in `hgmeans.sh` script, make sure that the ground-truth file is provided in `/labels` folder with the same name of the dataset.
+**Important.** If the parameter `evaluate` - for calculating external clustering measures - is enabled in `hgmeans.sh` script, make sure that the ground-truth file is provided in `/labels` folder with the same name of the dataset.
 
 To run the algorithm, try the following sequence of commands:
 
@@ -27,7 +27,26 @@ To run the algorithm, try the following sequence of commands:
 
 After the execution of the algorithm, output files will be saved in `/out` folder.
 
-# Data format
+In `hgmeans.sh` you can define the parameters of the algorithm:
+
+- Population size (default=10)
+`pi_min=10`
+
+- Maximum number of iterations (default=5000)
+`n2=5000`
+
+- Clustering evaluation (default=1)
+`evaluate=1`
+
+Then the `exec.sh` script is called with the following list of parameters:
+`./exec.sh "[Dataset Path] [$pi_min] [$n2] [$evaluate] [List of the number of clusters]"`
+
+Example:
+`./exec.sh "data/fisher.txt $pi_min $n2 $evaluate 2 5 10"`
+
+This script executes HG-means algorithm for "fisher" dataset, with 2, 5 and 10 clusters
+
+## Data format
 
 - DATASET files: In the first line of a dataset file, the number of data points (n) and the dimensionality of the data (d) is set, separated by a single space. The remaining lines correspond to the coordinates of data points. Each line contains the values of the d features of a sample, where x_ij correspond to the j-th feature of the i-th sample of the data. Each feature value is separated by a single space, as depicted in the scheme below:
 
@@ -35,7 +54,7 @@ After the execution of the algorithm, output files will be saved in `/out` folde
 |------|------|------|-----|------|
 | x_11 | x_12 | x_13 | ... | x_1d |
 | x_21 | x_22 | x_23 | ... | x_2d |
-| ...  | ...  | ...  | ... | x_2d |
+| ...  | ...  | ...  | ... | ...  |
 | x_n1 | x_n2 | x_n3 | ... | x_nd |
 
 - LABELS files: The content of a labels file exhibits the cluster of each sample of the dataset according to ground-truth, where y_i correspond to the label of the i-th sample:
