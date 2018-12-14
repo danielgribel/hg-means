@@ -104,8 +104,7 @@ pair<double, int> GeneticOperations::FrontMax(vector< pair<double, int> >& heap)
 // O(max_population x n)
 void GeneticOperations::SelectSurvivors(const Dataset* x) {
     int m = pb_data.GetM();
-    unordered_map<size_t, Item> hash_table;
-    hash_table.reserve(37);
+    unordered_set<Item, KeyHash, KeyEqual> hash_table;
     int max_population = population.size();
     vector<Solution*> new_population;
     vector<int> discarded(max_population);
@@ -116,13 +115,14 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
     for(int i = 0; i < max_population; i++) {
         algorithm->initialize(x, m, GetAssignment(i), 1); // O(m)
         vector<int> card = GetCardinality(algorithm->getClusterSize()); // O(m)
+        sort(card.begin(), card.end());
         Item an_item;
         an_item.cost = GetCost(i);
         an_item.cardinality = card;
-        if (hash_table.find( Hash<Item>()(an_item) ) != hash_table.end()) {
+        if (hash_table.find(an_item) != hash_table.end()) {
             PushMax(heap_clones, GetCost(i), i);
         } else {
-            hash_table.insert(pair<size_t, Item> (Hash<Item>()(an_item), an_item));
+            hash_table.insert(an_item);
             PushMax(heap_individuals, GetCost(i), i);
         }
         discarded[i] = 0;

@@ -11,7 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <unordered_map>
+#include <unordered_set>
 #include "hamerly/dataset.h"
 #include "hamerly/kmeans.h"
 #include "hamerly/general_functions.h"

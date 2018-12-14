@@ -16,20 +16,33 @@ using namespace std;
 
 struct Item {
     double cost;
-    vector<int> cardinality;
+    vector<int> cardinality; // must be a sorted vector
 };
 
-template<class Item> class Hash {
+struct KeyHash {
     public:
-        size_t operator()(Item &s) const {
-            sort(s.cardinality.begin(), s.cardinality.end());
-            size_t seed = 0;
-            for(int i = 0; i < s.cardinality.size(); i++) {
-                // seed ^= s.cardinality[i] + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-                seed = seed + (i+1)*s.cardinality[i];
-            }
-            return hash<string>()(to_string(s.cost)) ^ seed;
+    long operator () ( const Item& x ) const {
+        long seed = 0;
+        for(int i = 0; i < x.cardinality.size(); i++) {
+            seed = seed + (i+1)*x.cardinality[i];
         }
+        return long(x.cost + seed) % 997;
+    }
+};
+
+struct KeyEqual {
+    public:
+    bool operator () ( const Item& x, const Item& y ) const {
+        if ( !(x.cost > y.cost - 0.00000001 && x.cost < y.cost + 0.00000001 ) ) {
+            return false;
+        }
+        for(int i = 0; i < x.cardinality.size(); i++) {
+            if(x.cardinality[i] != y.cardinality[i]) {
+                return false;
+            }
+        }
+		return true ;
+    }
 };
 
 namespace MathUtils {
