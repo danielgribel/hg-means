@@ -76,14 +76,6 @@ void GeneticOperations::ReplaceBestSolution(Solution* s) {
     StoreBestSolution(s);
 }
 
-// int* GeneticOperations::GetCardinality(int** cluster_size) {
-//     int* cardinality = new int [pb_data.GetM()];
-//     for(int i = 0; i < pb_data.GetM(); i++) {
-//         cardinality[i] = cluster_size[0][i];
-//     }
-//     return cardinality;
-// }
-
 vector<int> GeneticOperations::GetCardinality(int** cluster_size) {
     vector<int> cardinality (pb_data.GetM());
     for(int i = 0; i < pb_data.GetM(); i++) {
@@ -112,7 +104,6 @@ pair<double, int> GeneticOperations::FrontMax(vector< pair<double, int> >& heap)
 // O(max_population x n)
 void GeneticOperations::SelectSurvivors(const Dataset* x) {
     int m = pb_data.GetM();
-    // Hash* table = new Hash();
     unordered_map<size_t, Item> hash_table;
     hash_table.reserve(37);
     int max_population = population.size();
@@ -121,24 +112,6 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
     vector< pair<double, int> > heap_individuals;
     vector< pair<double, int> > heap_clones;
     Kmeans* algorithm = new HamerlyKmeans();
-
-    // O(max_population x n)
-    // for(int i = 0; i < max_population; i++) {
-    //     algorithm->initialize(x, m, GetAssignment(i), 1); // O(m)
-    //     int* card = GetCardinality(algorithm->getClusterSize()); // O(m)
-    //     // Check if element is in hash: O(n) worst case
-    //     if(table->Exist(card, GetCost(i), m)) {
-    //         PushMax(heap_clones, GetCost(i), i);
-    //         delete [] card;
-    //     } else {
-    //         Item an_item;
-    //         an_item.cost = GetCost(i);
-    //         an_item.cardinality = card;
-    //         table->Insert(an_item, m);
-    //         PushMax(heap_individuals, GetCost(i), i);
-    //     }
-    //     discarded[i] = 0;
-    // }
 
     for(int i = 0; i < max_population; i++) {
         algorithm->initialize(x, m, GetAssignment(i), 1); // O(m)
@@ -181,7 +154,6 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) {
             delete population[i];
         }
     }
-    // delete table;
     population = new_population;
 }
 

@@ -18,7 +18,6 @@
 #include "PbData.h"
 #include "Solution.h"
 #include "MathUtils.h"
-// #include "Hash.h"
 #include "dlib-master/dlib/optimization/max_cost_assignment.h"
 
 using namespace std;
@@ -49,7 +48,6 @@ class GeneticOperations {
         unsigned short* GetKppAssignment(const Dataset* x);
 
         // Get the cardinalities (number of points) of clusters
-        // int* GetCardinality(int** clusterSize);
         vector<int> GetCardinality(int** cluster_size);
 
         // Push element to heap, such that the element with maximum value is on top
