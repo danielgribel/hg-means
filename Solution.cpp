@@ -34,21 +34,27 @@ Solution::~Solution() {
     delete [] assignment;
 }
 
+void Solution::InitAssignment() {
+	assignment = new unsigned short[pb_data.GetN()];
+}
+
+void Solution::InitCentroids() {
+    centroids = vector< vector<double> > (pb_data.GetM(), vector<double>(pb_data.GetD(), 0.0));
+}
+
 void Solution::AssignmentToCentroids() { // O(nd)
     InitCentroids();
-    int n = pb_data.GetN();
     int d = pb_data.GetD();
-    int m = pb_data.GetM();
     double* data = pb_data.GetData();
-    vector<int> sizes(m,0);
+    vector<int> sizes(pb_data.GetM(),0);
 
-    for(int i = 0; i < n; i++) {
-        sizes[assignment[i]] = sizes[assignment[i]]+1;
+    for(int i = 0; i < pb_data.GetN(); i++) {
+        sizes[ assignment[i] ]++;
         for(int j = 0; j < d; j++) {
-            centroids[assignment[i]][j] = centroids[assignment[i]][j] + data[i*d+j];
+            centroids[ assignment[i] ][j] = centroids[ assignment[i] ][j] + data[i*d+j];
         }
     }
-    for(int i = 0; i < m; i++) {
+    for(int i = 0; i < pb_data.GetM(); i++) {
         for(int j = 0; j < d; j++) {
             if(sizes[i] != 0) {
                 centroids[i][j] = (1.0*centroids[i][j])/sizes[i];
@@ -59,12 +65,12 @@ void Solution::AssignmentToCentroids() { // O(nd)
 
 void Solution::CentroidsToAssignment() { // O(nmd)
     InitAssignment();
-    int n = pb_data.GetN();
     int d = pb_data.GetD();
     int m = pb_data.GetM();
     double* data = pb_data.GetData();
     double dist, mindist;
-    for(int i = 0; i < n; i++) {
+
+    for(int i = 0; i < pb_data.GetN(); i++) {
         mindist = MAX_FLOAT;
         for(int j = 0; j < m; j++) {
             dist = PointCenterDist(i, centroids[j], d, data);
@@ -80,135 +86,156 @@ void Solution::Repair() {
     int n = pb_data.GetN();
     int d = pb_data.GetD();
     int m = pb_data.GetM();
+
     double* data = pb_data.GetData();
 
-    vector<bool> populated(m, false); // the (boolean) list of empty clusters 
-    vector<int> empty_clusters; // the list of empty clusters
+    // Size (cardinality) of clusters
+    vector<int> sizes(m, 0);
+
+    // List of empty clusters (index of clusters)
+    vector<int> empty_clusters;
     
-    // Identify populated and empty clusters
-    for(int i = 0; i < n; i++)
-        populated[assignment[i]] = true;
+    // Count cardinality of each cluster
+    for(int i = 0; i < n; i++) {
+        sizes[ assignment[i] ]++;
+    }
 
     // Construct the list of empty clusters
     for(int j = 0; j < m; j++) {
-        if(populated[j] == false)
+        if(sizes[j] == 0)
             empty_clusters.push_back(j);
     }
 
     if(empty_clusters.size() > 0) {
-        vector<double> dist_centroid(n); // The distance from data points to their centroids
-        double sum_dist = 0.0; // Sum of all distances from data points to their centroids
-        vector<int> sizes(m, 0); // The size (cardinality) of clusters
-        AssignmentToCentroids();
+        vector<double> dist_centroid(n); // Distance from data points to their centroids
+        double total_dist = 0.0; // Total distances from data points to their centroids
         vector<double> pr(n);
 
+        // Update the coordinates of centroids
+        AssignmentToCentroids();
+
+        // Get the distance from each data point to its centroid
         for(int i = 0; i < n; i++) {
-            dist_centroid[i] = PointCenterDist(i, centroids[assignment[i]], d, data);
-            sum_dist = sum_dist + dist_centroid[i];
-            sizes[assignment[i]] = sizes[assignment[i]]+1;
+            dist_centroid[i] = PointCenterDist(i, centroids[ assignment[i] ], d, data);
+            total_dist = total_dist + dist_centroid[i];
         }
 
-        double z = 0.0;
-        for(int i = 0; i < n; i++) {
-            pr[i] = z + Pr(dist_centroid[i], sum_dist, alpha, n);
-            z = pr[i];
+        // Get for each data point the cumulative probability of being chosen to move to an empty center
+        pr[0] = Pr(dist_centroid[0], total_dist, alpha, n);
+        for(int i = 1; i < n; i++) {
+            pr[i] = pr[i-1] + Pr(dist_centroid[i], total_dist, alpha, n);
         }
 
-        int it = 0;
-        int p;
-
-        while(it < empty_clusters.size()) {
+        int e = 0;
+        // While an empty cluster exists, randomly select a data point and move it to an empty cluster
+        while(e < empty_clusters.size()) {
+            // Wheel roulette selection
+            // Portion associated to data points far from their centroids are more likely to be moved to an empty cluster, according to alpha
             double r = RandBetween(0.0, pr[n-1]); // O(1)
+            // Find in the wheel roulette the corresponding data point index
             int p = FindIndex(pr, r, 0, n-1) + 1;
-            if(sizes[assignment[p]] > 1) {
-                sizes[assignment[p]] = sizes[assignment[p]]-1;
-                assignment[p] = empty_clusters[it];
-                it++;
+            // If the current cluster of point p has more than 1 element, move p to an empty cluster  
+            if(sizes[ assignment[p] ] > 1) {
+                // Decrement the size of the current cluster of point p
+                sizes[ assignment[p] ]--;
+                // Move point p to the e-th empty cluster
+                assignment[p] = empty_clusters[e];
+                e++;
             }
         }
     }
+    // Update the coordinates of centroids
 	AssignmentToCentroids();
 }
 
-void Solution::Mutate() {
-    int n = pb_data.GetN();
-    int d = pb_data.GetD();
-    int m = pb_data.GetM();
+void Solution::RemoveCenter(int c) {
     double* data = pb_data.GetData();
-    vector<double> dist_centroid (n);
-    vector<double> pr (n);
-    vector<int> barycenter_obj;
-    vector< vector<double> > newcentroids (m, vector<double>(d));
+    vector<int> list_points;
     double dist, mindist;
     
-    // Randomly select one centroid to remove it from the solution
-    int barycenter = rand() % m;
-    vector< vector<double> > c3 = centroids;
-
-    // Keep the data points assigned to the centroid to be removed
-    for(int i = 0; i < n; i++) { // O(n)
-        if(assignment[i] == barycenter) {
-            barycenter_obj.push_back(i);
+    // Keep the list of data points assigned to the centroid to be removed
+    for(int i = 0; i < pb_data.GetN(); i++) {
+        if(assignment[i] == c) {
+            list_points.push_back(i);
         }
     }
 
-    int b;
     // Re-assign data points to the closest remaining centroid
-    for(int q = 0; q < barycenter_obj.size(); q++) { // O(|c|md)
-        b = barycenter_obj[q];
+    for(int i = 0; i < list_points.size(); i++) { // O( |c| m d )
         mindist = MAX_FLOAT;
-        for(int j = 0; j < m; j++) {
-            if(j != barycenter) {
-                dist = PointCenterDist(b, c3[j], d, data);
+        for(int j = 0; j < pb_data.GetM(); j++) {
+            if(j != c) {
+                dist = PointCenterDist(list_points[i], centroids[j], pb_data.GetD(), data);
                 if(dist < mindist) {
                     mindist = dist;
-                    assignment[b] = j;
+                    assignment[ list_points[i] ] = j;
                 }
             }
         }
     }
+}
 
-    double sumDist = 0.0;
+void Solution::ReinsertCenter(int c, int p, vector<double> dist_centroid) {
+    int d = pb_data.GetD();
+    double* data = pb_data.GetData();
+    
+    // Place centroid c in the position of data point p
+    for(int j = 0; j < d; j++) {
+        centroids[c][j] = data[(p*d)+j];
+    }
+
+    // Re-assign data points according to the solution with m centroids
+    for(int i = 0; i < pb_data.GetN(); i++) { // O(nd)
+        if(PointCenterDist(i, centroids[c], d, data) < dist_centroid[i]) {
+            assignment[i] = c;
+        }
+    }
+}
+
+void Solution::Mutate() {
+    int n = pb_data.GetN();
+    double* data = pb_data.GetData();
+    vector<double> dist_centroid (n);
+    vector<double> pr (n);
+    double total_dist = 0.0;
+    
+    // Randomly select one centroid to remove from the solution
+    int c = rand() % pb_data.GetM();
+
+    // Remove random center and re-assign data points to the closest remaining center
+    RemoveCenter(c);
+
+    // Get the distance from each data point to its centroid defined in the solution with m-1 centroids
     for(int i = 0; i < n; i++) {
-        dist_centroid[i] = PointCenterDist(i, c3[assignment[i]], d, data);
-        sumDist = sumDist + dist_centroid[i];
+        dist_centroid[i] = PointCenterDist(i, centroids[ assignment[i] ], pb_data.GetD(), data);
+        total_dist = total_dist + dist_centroid[i];
     }
 
-    // Get the cumulative distance from each data point $i$ to its centroid defined in $mutation$, i.e., the solution with $m-1$ centroids
-    double z = 0.0;
-    for(int i = 0; i < n; i++) { // O(nd)
-        pr[i] = z + Pr(dist_centroid[i], sumDist, alpha, n);
-        z = pr[i];
+    // Get for each data point the cumulative probability of being chosen
+    pr[0] = Pr(dist_centroid[0], total_dist, alpha, n);
+    for(int i = 1; i < n; i++) {
+        pr[i] = pr[i-1] + Pr(dist_centroid[i], total_dist, alpha, n);
     }
 
-    // Wheel roulette random choose of a data point. data points far from their centroids are more likely to be chosen
+    // Wheel roulette selection
+    // Portion associated to data points far from their centroids are more likely to be chosen, according to alpha
     double r = RandBetween(0.0, pr[n-1]); // O(1)
+
+    // Find in the wheel roulette the corresponding data point index
     int p = FindIndex(pr, r, 0, n-1) + 1;
 
-    // Re-insert the removed centroid in the position determined by the roulette wheel
-    for(int i = 0; i < m; i++) { // O(md)
-        if(i == barycenter) {
-            for(int j = 0; j < d; j++) {
-                newcentroids[barycenter][j] = data[(p*d)+j];
-            }
-        } else {
-            for(int j = 0; j < d; j++) {
-                newcentroids[i][j] = c3[i][j];
-            }
-        }
-    }
+    // Reinsert removed center c in the position of a data point p; re-assign data points to closest center
+    ReinsertCenter(c, p, dist_centroid);
 
-    // Re-assign data points according to the solution with $m$ centroids
-    for(int i = 0; i < n; i++) { // O(nd)
-        if(PointCenterDist(i, newcentroids[barycenter], d, data) < dist_centroid[i]) {
-            assignment[i] = barycenter;
-        }
-    }
+    // Repair the solution if assignment is degenerated
     Repair();
 }
 
 void Solution::MutateAlpha() {
+    // Perturbate alpha parameter
     alpha = alpha + RandBetween(-MUTATION_RATE, MUTATION_RATE);
+    
+    // Force alpha to be within the interval 
     if(alpha > 1.0) {
         alpha = 1.0;
     }
@@ -219,6 +246,7 @@ void Solution::MutateAlpha() {
 
 void Solution::DoLocalSearch(Dataset const *x) {
     Kmeans *algorithm = new HamerlyKmeans();
+
     // Check for missing initialization
     if(assignment == NULL) {
         cerr << "Please initialize centers first" << endl;
@@ -228,19 +256,19 @@ void Solution::DoLocalSearch(Dataset const *x) {
         cerr << "Please load a dataset first" << endl;
         return;
     }
+    // Initialize centers
     algorithm->initialize(x, pb_data.GetM(), assignment, 1);
+    
+    // Run K-means
     int numIt = algorithm->run(MAX_INT);
+
+    // Get solution cost
     cost = algorithm->getSSE();
+    
+    // Update centers
     AssignmentToCentroids();
+    
     delete algorithm;
-}
-
-void Solution::InitAssignment() {
-	assignment = new unsigned short[pb_data.GetN()];
-}
-
-void Solution::InitCentroids() {
-    centroids = vector< vector<double> > (pb_data.GetM(), vector<double>(pb_data.GetD(), 0.0));
 }
 
 void Solution::CountRandCoefficients(Solution* ground_truth, int& a, int& b, int& c, int& d) {

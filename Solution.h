@@ -44,6 +44,9 @@ class Solution {
         // Problem Data
         PbData pb_data;
 
+        // Generate the centroids representation of a solution (assignment representation supposed to exist)
+        void AssignmentToCentroids();
+
         // Generate the assignment representation of a solution (centroids representation supposed to exist)
         void CentroidsToAssignment();
 
@@ -56,18 +59,26 @@ class Solution {
         // Count coefficients for Rand and C-Rand indicators
         void CountRandCoefficients(Solution* ground_truth, int& a, int& b, int& c, int& d);
 
+        // Remove random center and re-assign data points to closest remaining center
+        // Partial assignment with m-1 centers is generated
+        void RemoveCenter(int barycenter);
+
+        // Reinsert removed center c in the position of a data point p; re-assign data points to closest center
+        // Complete assignment with m centers is generated
+        void ReinsertCenter(int c, int p, vector<double> dist_centroid);
+
     public:
         
-        // Constructor in which we know solution assignment and cost 
+        // Constructor in which solution assignment and cost are known 
         Solution(unsigned short* assignment, double cost, double alpha, PbData pb_data);
 
-        // Constructor in which we know solution centroids and cost 
+        // Constructor in which solution centroids and cost are known
         Solution(vector< vector<double> > centroids, double cost, double alpha, PbData pb_data);
 
-        // Constructor in which we know solution assignment 
+        // Constructor in which solution assignment is known
         Solution(unsigned short* assignment, double alpha, PbData pb_data);
 
-        // Constructor in which we know solution centroids
+        // Constructor in which solution centroids are known
         Solution(vector< vector<double> > centroids, double alpha, PbData pb_data);
 
         // Assignment free memory
@@ -97,11 +108,8 @@ class Solution {
         // Mutate the alpha weigth
         void MutateAlpha();
 
-        // Repair the solution if it is degenerated (less than m clusters)
+        // Repair the solution if assignment is degenerated (less than m clusters)
         void Repair();
-
-        // Generate the centroids representation of a solution (assignment representation supposed to exist)
-        void AssignmentToCentroids();
 
         /* External Clustering measures */
 

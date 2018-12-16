@@ -59,6 +59,12 @@ class GeneticOperations {
         // Get the maximum-valued element from heap
         pair<double, int> FrontMax(vector< pair<double, int> >& heap);
 
+        // Detect clones and non-clones solutions
+        void DetectClones(const Dataset* x, vector< pair<double, int> >& heap_individuals, vector< pair<double, int> >& heap_clones);
+
+        // Remove solutions that are clones or bad regarding fitness. Then, update the population
+        void ResetPopulation(vector< pair<double, int> >& heap_individuals, vector< pair<double, int> >& heap_clones);
+
     public:
         
         GeneticOperations(PbData pb_data, Param param);
@@ -75,7 +81,7 @@ class GeneticOperations {
         // Add solution to current population
         void AddSolution(Solution* solution) { population.push_back(solution); };
 
-        // Delete solution to current population
+        // Delete solution of current population
         void DeleteSolution(int i) { delete population[i]; };
 
         // Get the MSSC cost of the i-th solution in population
