@@ -75,8 +75,6 @@ void printArray(T const *arr, int length, std::string separator) {
     }
 }
 
-double getMemoryUsage();
-
 void centerDataset(Dataset *x);
 
 void assign(Dataset const &x, Dataset const &c, unsigned short *assignment);

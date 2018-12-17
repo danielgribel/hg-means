@@ -13,7 +13,6 @@
 #include <numeric>
 #include <cstring>
 #include <cstdio>
-#include <unistd.h>
 
 void addVectors(double *a, double const *b, int d) {
     double const *end = a + d;
@@ -236,33 +235,6 @@ Dataset *init_centers_kmeanspp_v2(Dataset const &x, unsigned short k) {
 
     return c;
 }
-
-
-/**
- * in MB
- */
-double getMemoryUsage() {
-    char buf[30];
-    snprintf(buf, 30, "/proc/%u/statm", (unsigned)getpid());
-    FILE* pf = fopen(buf, "r");
-    unsigned int totalProgramSizeInPages = 0;
-    unsigned int residentSetSizeInPages = 0;
-    if (pf) {
-        int numScanned = fscanf(pf, "%u %u" /* %u %u %u %u %u"*/, &totalProgramSizeInPages, &residentSetSizeInPages);
-        if (numScanned != 2) {
-            return 0.0;
-        }
-    }
-    
-    fclose(pf);
-    pf = NULL;
-    
-    double sizeInKilobytes = residentSetSizeInPages * 4.0; // assumes 4096 byte page
-    // getconf PAGESIZE
-    
-    return sizeInKilobytes;
-}
-
 
 void assign(Dataset const &x, Dataset const &c, unsigned short *assignment) {
     for (int i = 0; i < x.n; ++i) {
