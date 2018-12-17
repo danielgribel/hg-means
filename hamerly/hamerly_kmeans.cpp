@@ -56,7 +56,11 @@ int HamerlyKmeans::runThread(int threadId, int maxIterations) {
 
             // if upper[i] is less than the greater of these two, then we can
             // ignore record i
-            double upper_comparison_bound = std::max(s[closest], lower[i]);
+			double upper_comparison_bound;
+			if (s[closest] > lower[i])
+				upper_comparison_bound = s[closest]; 
+			else
+				upper_comparison_bound = lower[i];
 
             // first check: if u(x) <= s(c(x)) or u(x) <= lower(x), then ignore
             // x, because its closest center must still be closest
