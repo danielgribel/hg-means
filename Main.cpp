@@ -27,15 +27,27 @@ void SaveOutput(ofstream& writer_output, stringstream& filename_output, GeneticO
     writer_output << m << " ";
     writer_output << fixed << setprecision(10) << solution->GetCost() << " ";
     writer_output << fixed << setprecision(4) << elapsedSecs;
+
     // Attach clustering indexes to output
     if(prm.eval) {
         writer_output << " ";
-        writer_output << fixed << setprecision(4) << solution->CRand(ground_truth) << " ";
-        writer_output << fixed << setprecision(4) << solution->Nmi(ground_truth) << " ";
-        writer_output << fixed << setprecision(4) << solution->CentroidIndex(ground_truth);
+        writer_output << fixed << setprecision(4) << solution->GetCRand() << " ";
+        writer_output << fixed << setprecision(4) << solution->GetNmi() << " ";
+        writer_output << fixed << setprecision(4) << solution->GetCentroidIndex();
     }
     writer_output << "\n";
     writer_output.close();
+}
+
+void PrintResult(Solution* best_solution, Solution* ground_truth, double cpu_time, bool eval) {
+    cout << "-- Optimization finished: Solution objective = " << best_solution->GetCost() << " | CPU time = " << cpu_time << " s";
+    if(eval) {
+        best_solution->ComputeExternalMetrics(ground_truth);
+        cout << setprecision(4) << " | C-Rand = " << best_solution->GetCRand();
+        cout << setprecision(4) << " | NMI = " << best_solution->GetNmi();
+        cout << setprecision(4) << " | CI = " << best_solution->GetCentroidIndex();
+    }
+    cout << endl << endl;
 }
 
 void Run(int seed, string file_data, Param prm, int m) {
@@ -122,13 +134,15 @@ void Run(int seed, string file_data, Param prm, int m) {
         // Create GeneticOperations instance
         GeneticOperations* genetic = new GeneticOperations(pb_data, prm);
 
+        cout << "-- Starting optimization: " << file_data  << " dataset | m = " << pb_data.GetM() << " clusters" << endl;
+        
         // Run HG-Means algorithm
         genetic->HGMeans(x);
         
         // Measure cpu time in seconds
         double elapsedSecs = double(clock() - begin) / CLOCKS_PER_SEC;
         
-        cout << file_data << " " << pb_data.GetM() << " " << genetic->GetBestSolution()->GetCost() << " " << elapsedSecs << endl;
+        PrintResult(genetic->GetBestSolution(), ground_truth, elapsedSecs, prm.eval);
         
         if(SAVE_FILE) {
             // Save output results 
@@ -143,6 +157,13 @@ void Run(int seed, string file_data, Param prm, int m) {
 }
 
 int main(int argc, char** argv) {
+
+    if(argc < 6) {
+        cerr << "Insufficient number of parameters provided. Please use the following input format:" << 
+        endl << "./hgmeans DatasetPath Pi_min N2 Evaluate [M]" << endl;
+        return 0;
+    }
+
     try {
         Param parameters;
         int m;
@@ -150,11 +171,24 @@ int main(int argc, char** argv) {
         parameters.size_population = atoi(argv[2]);
         parameters.max_it = atoi(argv[3]);
         parameters.eval = atoi(argv[4]);
+        
+        // Defining bounds on variables
+        if(parameters.size_population < 1 || parameters.size_population > 100000) {
+            parameters.size_population = 10; // Default
+        }
+        if(parameters.max_it < 1 || parameters.max_it > 100000) {
+            parameters.max_it = 5000; // Default
+        }
+        if(parameters.eval != 0 && parameters.eval != 1) {
+            parameters.eval = 0; // Default
+        }
+
         parameters.w = 2;
         parameters.mutation = 1;
         parameters.nb_runs = 1;
         parameters.max_population = 2*parameters.size_population;
         parameters.no_improvement_it = parameters.max_it/10;
+
         if(parameters.no_improvement_it < 1) {
             parameters.no_improvement_it = 1;
         }

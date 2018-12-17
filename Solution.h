@@ -44,6 +44,12 @@ class Solution {
         // Problem Data
         PbData pb_data;
 
+        double crand;
+
+        double nmi;
+
+        double centroid_index;
+
         // Generate the centroids representation of a solution (assignment representation supposed to exist)
         void AssignmentToCentroids();
 
@@ -113,17 +119,22 @@ class Solution {
 
         /* External Clustering measures */
 
-        // Calculate the Rand indicator
-        double Rand(Solution* ground_truth);
-
         // Calculate the C-Rand indicator
-        double CRand(Solution* ground_truth);
+        void ComputeCRand(Solution* ground_truth);
 
         // Calculate the Normalized mutual information indicator
-        double Nmi(Solution* ground_truth);
+        void ComputeNmi(Solution* ground_truth);
 
         // Calculate the Centroid Index indicator
-        double CentroidIndex(Solution* ground_truth);
+        void ComputeCentroidIndex(Solution* ground_truth);
+
+        void ComputeExternalMetrics(Solution* ground_truth);
+
+        double GetCRand() { return crand; };
+
+        double GetNmi() { return nmi; };
+
+        double GetCentroidIndex() { return centroid_index; };
 };
 
 #endif

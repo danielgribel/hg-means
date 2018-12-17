@@ -297,24 +297,17 @@ void Solution::CountRandCoefficients(Solution* ground_truth, int& a, int& b, int
 	}
 }
 
-double Solution::Rand(Solution* ground_truth) {
-	int a, b, c, d;
-	CountRandCoefficients(ground_truth, a, b, c, d);
-	double randIndex = 1.0*(a + d)/(a + b + c + d);
-	return randIndex;
-}
-
-double Solution::CRand(Solution* ground_truth) {
+void Solution::ComputeCRand(Solution* ground_truth) {
 	int a, b, c, d;
 	CountRandCoefficients(ground_truth, a, b, c, d);
 	int total = a + b + c + d;
 	double crandIndex = (a - (1.0*(b + a)*(c + a))/total)/((1.0*(b + a + c + a))/2 - (1.0*(b + a)*(c + a))/total);
-	return crandIndex;
+	crand = crandIndex;
 }
 
 // Implemented by @Carlo Nicolini
 // More information in the original repository: https://github.com/CarloNicolini/rnmi
-double Solution::Nmi(Solution* ground_truth) {
+void Solution::ComputeNmi(Solution* ground_truth) {
 	int n = pb_data.GetN();
 	unsigned short* pa = assignment;
 	unsigned short* pb = ground_truth->GetAssignment();
@@ -328,59 +321,64 @@ double Solution::Nmi(Solution* ground_truth) {
 	}
 	qa++;
 	qb++;
-	if(qa == 1 && qb == 1) return 0.0;
-	ga.resize(qa);
-	for(int q = 0; q < qa; q++) ga[q]=0;
-	gb.resize(qb);
-	for(int q = 0; q < qb; q++) gb[q]=0;
 
-	vector< vector<int> > A;
-	vector< vector<int> > B;
-	A.resize(qa); // Existing structure
-	B.resize(qa); // Counting structure
-	for(int i = 0; i < n; i++) {
-		int q = pa[i];
-		int t = pb[i];
-		ga[q]++;
-		gb[t]++;
-		int idx = -1;
-		for(int j = 0; j < A[q].size(); j++) {
-			if(A[q][j] == t) {
-				idx=j;
-				break;
-			}
-		}
-		if(idx == -1) { // Pair [x y] did not show up
-			A[q].push_back(t);
-			B[q].push_back(1);
-		} else { // [x y] is there
-			B[q][idx] += 1;
-		}
-	}
-	double Ha = 0;
-	for(int q = 0; q < qa; q++) {
-		if(ga[q] == 0) continue;
-		double prob = 1.0*ga[q]/n;
-		Ha += prob*log(prob);
-	}
-	double Hb=0;
-	for(int q = 0; q < qb; q++) {
-		if(gb[q] == 0) continue;
-		double prob = 1.0*gb[q]/n;
-		Hb += prob*log(prob);
-	}
-	double Iab=0;
-	for(int q = 0; q < qa; q++) {
-		for(int idx = 0; idx < A[q].size(); idx++) {
-			double prob = 1.0*B[q][idx]/n;
-			int t = A[q][idx];
-			Iab += prob*log(prob/ ( 1.0*ga[q]/n*gb[t]/n ));
-		}
-	}
-	return -2.0*Iab/(Ha+Hb);
+	if(qa == 1 && qb == 1) {
+        nmi = 0.0;
+    } else {
+        ga.resize(qa);
+        for(int q = 0; q < qa; q++) ga[q]=0;
+        gb.resize(qb);
+        for(int q = 0; q < qb; q++) gb[q]=0;
+
+        vector< vector<int> > A;
+        vector< vector<int> > B;
+        A.resize(qa); // Existing structure
+        B.resize(qa); // Counting structure
+        for(int i = 0; i < n; i++) {
+            int q = pa[i];
+            int t = pb[i];
+            ga[q]++;
+            gb[t]++;
+            int idx = -1;
+            for(int j = 0; j < A[q].size(); j++) {
+                if(A[q][j] == t) {
+                    idx=j;
+                    break;
+                }
+            }
+            if(idx == -1) { // Pair [x y] did not show up
+                A[q].push_back(t);
+                B[q].push_back(1);
+            } else { // [x y] is there
+                B[q][idx] += 1;
+            }
+        }
+        double Ha = 0;
+        for(int q = 0; q < qa; q++) {
+            if(ga[q] == 0) continue;
+            double prob = 1.0*ga[q]/n;
+            Ha += prob*log(prob);
+        }
+        double Hb=0;
+        for(int q = 0; q < qb; q++) {
+            if(gb[q] == 0) continue;
+            double prob = 1.0*gb[q]/n;
+            Hb += prob*log(prob);
+        }
+        double Iab=0;
+        for(int q = 0; q < qa; q++) {
+            for(int idx = 0; idx < A[q].size(); idx++) {
+                double prob = 1.0*B[q][idx]/n;
+                int t = A[q][idx];
+                Iab += prob*log(prob/ ( 1.0*ga[q]/n*gb[t]/n ));
+            }
+        }
+
+        nmi = -2.0*Iab/(Ha+Hb);
+    }
 }
 
-double Solution::CentroidIndex(Solution* ground_truth) {
+void Solution::ComputeCentroidIndex(Solution* ground_truth) {
 	int d = pb_data.GetD();
 	int m = pb_data.GetM();
 	double dist, mindist, cmin;
@@ -402,5 +400,11 @@ double Solution::CentroidIndex(Solution* ground_truth) {
 		orphan[cmin] = false;
 	}
 
-	return ci;
+	centroid_index = ci;
+}
+
+void Solution::ComputeExternalMetrics(Solution* ground_truth) {
+    ComputeCRand(ground_truth);
+    ComputeNmi(ground_truth);
+    ComputeCentroidIndex(ground_truth);
 }
