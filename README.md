@@ -46,24 +46,22 @@ After the execution of the algorithm, output files will be saved in `/out` folde
 
 **Dataset files.** In the first line of a dataset file, the number of data points (n) and the dimensionality of the data (d) is set, separated by a single space. The remaining lines correspond to the coordinates of data points. Each line contains the values of the d features of a sample, where x_ij correspond to the j-th feature of the i-th sample of the data. Each feature value is separated by a single space, as depicted in the scheme below:
 
-| n    | d    |      |     |      |
-|------|------|------|-----|------|
-| x_11 | x_12 | x_13 | ... | x_1d |
-| x_21 | x_22 | x_23 | ... | x_2d |
-| ...  | ...  | ...  | ... | ...  |
-| x_n1 | x_n2 | x_n3 | ... | x_nd |
+|   n    |    d   |        |       |        |
+|--------|--------|--------|-------|--------|
+| x_{11} | x_{12} | x_{13} |  ...  | x_{1d} |
+| x_{21} | x_{22} | x_{23} |  ...  | x_{2d} |
+|  ...   |  ...   |  ...   |  ...  |  ...   |
+| x_{n1} | x_{n2} | x_{n3} |  ...  | x_{nd} |
 
 **Labels files.** The content of a labels file exhibits the cluster of each sample of the dataset according to ground-truth, where y_i correspond to the label of the i-th sample:
 
-|-----|
 | y_1 |
-|-----|
+
 | y_2 |
-|-----|
+
 | ... |
-|-----|
+
 | y_n |
-|-----|
 
 ## Output file
 
