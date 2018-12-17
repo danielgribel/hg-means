@@ -12,46 +12,35 @@ https://arxiv.org/abs/1804.09813
 
 ## Run
 
-Firstly, make sure that the datasets are placed in `/data` folder.
-
-The program parameters as well as the input data should be defined in `hgmeans.sh` script,
-which executes the algorithm.
-
-**Important.** If the parameter `evaluate` - for calculating external clustering measures - is enabled in `hgmeans.sh` script, make sure that the ground-truth file is provided in `/labels` folder with the same name of the dataset.
+Firstly, make sure that the dataset is placed in `/data` folder.
 
 To run the algorithm, try the following sequence of commands:
 
 `> make`
 
-`> ./hgmeans.sh`
+`> ./hgmeans "DatasetPath" Pi_min N2 Evaluate [M]`
+
+### Parameters of the algorithm
+
+`DatasetPath`: The path of dataset. Datasets should be placed in /data folder.
+
+`Pi_min` (default=10): Population size. Determines the size of the population in the genetic algorithm.
+
+`N2` (default=5000): Maximum number of iterations. Determines the total number of iterations the algorithm will take.
+
+`Evaluate` (default=0): Boolean parameter {0,1} for calculating external clustering measures. **Important:** If this parameter is set to 1, make sure that the ground-truth file is provided in `/labels` folder with the same name of the dataset.
+
+`[M]`: The list of number of custers m (1 <= m <= n). You can pass multiple values for m, separated by a single space.
+
+### Example
+
+`> make`
+
+`> ./hgmeans "data/fisher.txt" 10 5000 0 2 5 10`
+
+This script executes HG-means algorithm for "fisher" dataset, with 10 solutions in population, a maximum of 5000 iterations, no external evaluation; and 2, 5 and 10 clusters.
 
 After the execution of the algorithm, output files will be saved in `/out` folder.
-
-## Parameters of the algorithm
-
-In `hgmeans.sh` you can define the parameters of the algorithm:
-
-Population size (default=10)
-
-`pi_min=10`
-
-Maximum number of iterations (default=5000)
-
-`n2=5000`
-
-Clustering evaluation (default=1)
-
-`evaluate=1`
-
-Then the `exec.sh` script is called with the following list of parameters:
-
-`./exec.sh "[Dataset Path] [$pi_min] [$n2] [$evaluate] [List of the number of clusters]"`
-
-Example:
-
-`./exec.sh "data/fisher.txt $pi_min $n2 $evaluate 2 5 10"`
-
-This script executes HG-means algorithm for "fisher" dataset, with 2, 5 and 10 clusters
 
 ## Data format
 
@@ -73,3 +62,9 @@ This script executes HG-means algorithm for "fisher" dataset, with 2, 5 and 10 c
 | ... |
 
 | y_n |
+
+## Output file
+
+After the execution of the algorithm, output files are saved in `/out` folder, with the following header:
+
+| Pi_min | N2 | Dataset | m | SolutionCost | Time (s) |
