@@ -198,7 +198,7 @@ void Solution::Mutate() {
     vector<double> dist_centroid (n);
     vector<double> pr (n);
     double total_dist = 0.0;
-    
+
     // Randomly select one centroid to remove from the solution
     int c = rand() % pb_data.GetM();
 
@@ -383,11 +383,12 @@ double Solution::Nmi(Solution* ground_truth) {
 double Solution::CentroidIndex(Solution* ground_truth) {
 	int d = pb_data.GetD();
 	int m = pb_data.GetM();
-	double dist, cmin;
-	vector<int> orphan(m, 1);
-	
-	for(int i = 0; i < m; i++) {
-		double mindist = MAX_FLOAT;
+	double dist, mindist, cmin;
+	vector<bool> orphan(m, true);
+	double ci = m;
+
+    for(int i = 0; i < m; i++) {
+		mindist = MAX_FLOAT;
 		for(int j = 0; j < m; j++) {
 			dist = SquaredEuclidean(centroids[i], ground_truth->GetCentroids(j), d);
 			if(dist < mindist) {
@@ -395,13 +396,10 @@ double Solution::CentroidIndex(Solution* ground_truth) {
 				cmin = j;
 			}
 		}
-		orphan[cmin] = 0;
-	}
-
-	double ci = 0.0;
-
-	for(int i = 0; i < m; i++) {
-		ci = ci + orphan[i];
+        if(orphan[cmin] == true) {
+            ci--;
+        }
+		orphan[cmin] = false;
 	}
 
 	return ci;

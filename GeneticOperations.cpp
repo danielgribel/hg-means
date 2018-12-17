@@ -68,7 +68,7 @@ void GeneticOperations::CreateInitialPopulation(const Dataset* x) {
         
         // Add solution to population
         AddSolution(s);
-        
+
         if(s->GetCost() < best_cost) {
             best = s;
             best_cost = s->GetCost();
@@ -220,7 +220,6 @@ vector<long> GeneticOperations::MinAssignment(vector< vector<double> > c1, vecto
 }
 
 Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2) {
-    int d = pb_data.GetD();
     int m = pb_data.GetM();
 
     // Cross alpha parameter
@@ -233,7 +232,7 @@ Solution* GeneticOperations::Crossover(Solution* p1, Solution* p2) {
     vector< vector<double> > c2 = p2->GetCentroids();
     
     // Initialize centers of child solution
-    vector< vector<double> > c3 (m, vector<double>(d));
+    vector< vector<double> > c3 (m, vector<double>(pb_data.GetD()));
 
     // Hungarian method for Min-Assignment problem -- DLib implementation is called here
     vector<long> matching = MinAssignment(c1, c2); // O(m^3)
