@@ -22,15 +22,15 @@ To run the algorithm, try the following sequence of commands:
 
 ### Parameters of the algorithm
 
-`DatasetPath`: The path of dataset. Datasets should be placed in /data folder.
+`DatasetPath`: **The path of dataset.** Datasets should be placed in /data folder.
 
-`Pi_min` (default=10): Population size. Determines the size of the population in the genetic algorithm.
+`Pi_min` (default=10): **Population size.** Determines the size of the population in the genetic algorithm.
 
-`N2` (default=5000): Maximum number of iterations. Determines the total number of iterations the algorithm will take.
+`N2` (default=5000): **Maximum number of iterations.** Determines the total number of iterations the algorithm will take.
 
-`Evaluate` (default=0): Boolean parameter {0,1} for calculating external clustering measures. **Important:** If this parameter is set to 1, make sure that the ground-truth file is provided in `/labels` folder with the same name of the dataset.
+`Evaluate` (default=0): **External clustering evaluation.** Boolean parameter {0,1} for calculating external clustering measures. **Important:** If this parameter is set to 1, make sure that the ground-truth file is provided in `/labels` folder with the same name of the dataset.
 
-`[M]`: The list of number of custers m (1 <= m <= n). You can pass multiple values for m, separated by a single space.
+`[M]`: **The list of number of clusters m** (1 <= m <= n). You can pass multiple values for m, separated by a single space.
 
 ### Example
 
@@ -44,7 +44,7 @@ After the execution of the algorithm, output files will be saved in `/out` folde
 
 ## Data format
 
-- DATASET files: In the first line of a dataset file, the number of data points (n) and the dimensionality of the data (d) is set, separated by a single space. The remaining lines correspond to the coordinates of data points. Each line contains the values of the d features of a sample, where x_ij correspond to the j-th feature of the i-th sample of the data. Each feature value is separated by a single space, as depicted in the scheme below:
+**Dataset files.** In the first line of a dataset file, the number of data points (n) and the dimensionality of the data (d) is set, separated by a single space. The remaining lines correspond to the coordinates of data points. Each line contains the values of the d features of a sample, where x_ij correspond to the j-th feature of the i-th sample of the data. Each feature value is separated by a single space, as depicted in the scheme below:
 
 | n    | d    |      |     |      |
 |------|------|------|-----|------|
@@ -53,18 +53,15 @@ After the execution of the algorithm, output files will be saved in `/out` folde
 | ...  | ...  | ...  | ... | ...  |
 | x_n1 | x_n2 | x_n3 | ... | x_nd |
 
-- LABELS files: The content of a labels file exhibits the cluster of each sample of the dataset according to ground-truth, where y_i correspond to the label of the i-th sample:
+**Labels files.** The content of a labels file exhibits the cluster of each sample of the dataset according to ground-truth, where y_i correspond to the label of the i-th sample:
 
 | y_1 |
-
 | y_2 |
-
 | ... |
-
 | y_n |
 
 ## Output file
 
 After the execution of the algorithm, output files are saved in `/out` folder, with the following header:
 
-| Pi_min | N2 | Dataset | m | SolutionCost | Time (s) |
+| Pi_min | N2 | Dataset | m | SolutionCost | Time(s) |
