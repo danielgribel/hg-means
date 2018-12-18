@@ -15,7 +15,7 @@ Solution::Solution(unsigned short* assignment, double cost, double alpha, PbData
     AssignmentToCentroids();
 }
 
-Solution::Solution(vector< vector<double> > centroids, double cost, double alpha, PbData pb_data) {
+Solution::Solution(vector< vector<double> > & centroids, double cost, double alpha, PbData pb_data) {
 	this->centroids = centroids;
     this->cost = cost;
     this->alpha = alpha;
@@ -23,7 +23,7 @@ Solution::Solution(vector< vector<double> > centroids, double cost, double alpha
     CentroidsToAssignment();
 }
 
-Solution::Solution(vector< vector<double> > centroids, double alpha, PbData pb_data) {
+Solution::Solution(vector< vector<double> > & centroids, double alpha, PbData pb_data) {
 	this->centroids = centroids;
     this->alpha = alpha;
     this->pb_data = pb_data;
@@ -175,7 +175,7 @@ void Solution::RemoveCenter(int c) {
     }
 }
 
-void Solution::ReinsertCenter(int c, int p, vector<double> dist_centroid) {
+void Solution::ReinsertCenter(int c, int p, vector<double> & dist_centroid) {
     int d = pb_data.GetD();
     double* data = pb_data.GetData();
     
@@ -381,7 +381,8 @@ void Solution::ComputeNmi(Solution* ground_truth) {
 void Solution::ComputeCentroidIndex(Solution* ground_truth) {
 	int d = pb_data.GetD();
 	int m = pb_data.GetM();
-	double dist, mindist, cmin;
+	double dist, mindist;
+	int cmin = -1;
 	vector<bool> orphan(m, true);
 	double ci = m;
 

@@ -71,7 +71,7 @@ class Solution {
 
         // Reinsert removed center c in the position of a data point p; re-assign data points to closest center
         // Complete assignment with m centers is generated
-        void ReinsertCenter(int c, int p, vector<double> dist_centroid);
+        void ReinsertCenter(int c, int p, vector<double> & dist_centroid);
 
     public:
         
@@ -79,13 +79,13 @@ class Solution {
         Solution(unsigned short* assignment, double cost, double alpha, PbData pb_data);
 
         // Constructor in which solution centroids and cost are known
-        Solution(vector< vector<double> > centroids, double cost, double alpha, PbData pb_data);
+        Solution(vector< vector<double> > & centroids, double cost, double alpha, PbData pb_data);
 
         // Constructor in which solution assignment is known
         Solution(unsigned short* assignment, double alpha, PbData pb_data);
 
         // Constructor in which solution centroids are known
-        Solution(vector< vector<double> > centroids, double alpha, PbData pb_data);
+        Solution(vector< vector<double> > & centroids, double alpha, PbData pb_data);
 
         // Assignment free memory
         ~Solution();
@@ -96,7 +96,7 @@ class Solution {
         // Get all centroids
         vector< vector<double> > GetCentroids() { return centroids; };
 
-        // Get especific centroid 
+        // Get specific centroid 
         vector<double> GetCentroids(int i) { return centroids[i]; };
 
         // Get solution cost (in terms of MSSC objective)
