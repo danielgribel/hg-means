@@ -381,7 +381,8 @@ void Solution::ComputeNmi(Solution* ground_truth) {
 void Solution::ComputeCentroidIndex(Solution* ground_truth) {
 	int d = pb_data.GetD();
 	int m = pb_data.GetM();
-	double dist, mindist, cmin;
+	double dist, mindist;
+	int cmin = -1;
 	vector<bool> orphan(m, true);
 	double ci = m;
 

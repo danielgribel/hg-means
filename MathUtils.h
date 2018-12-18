@@ -51,7 +51,7 @@ namespace MathUtils {
 	const double MAX_FLOAT = std::numeric_limits<double>::max();
 	
     // Infinite integer
-	const double MAX_INT = std::numeric_limits<int>::max();
+	const int MAX_INT = std::numeric_limits<int>::max();
 
     // Given a vector of numbers, find the corresponding index of a given value
     int FindIndex(std::vector<double> values, double key, int first, int last);
