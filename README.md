@@ -20,6 +20,16 @@ To run the algorithm, try the following sequence of commands:
 
 `> ./hgmeans "DatasetPath" Pi_min N2 Evaluate [M]`
 
+### Example
+
+`> make`
+
+`> ./hgmeans "data/fisher.txt" 10 5000 0 2 5 10`
+
+This script executes HG-means algorithm for "fisher" dataset, with 10 solutions in population, a maximum of 5000 iterations, no external evaluation; and 2, 5 and 10 clusters.
+
+After the execution of the algorithm, output files will be saved in `/out` folder.
+
 ### Parameters of the algorithm
 
 `DatasetPath`: The path of dataset. Datasets should be placed in /data folder.
@@ -32,39 +42,37 @@ To run the algorithm, try the following sequence of commands:
 
 `[M]`: The list of number of clusters m (1 <= m <= n). You can pass multiple values for m, separated by a single space.
 
-### Example
-
-`> make`
-
-`> ./hgmeans "data/fisher.txt" 10 5000 0 2 5 10`
-
-This script executes HG-means algorithm for "fisher" dataset, with 10 solutions in population, a maximum of 5000 iterations, no external evaluation; and 2, 5 and 10 clusters.
-
-After the execution of the algorithm, output files will be saved in `/out` folder.
-
 ## Data format
 
 **Dataset files.** In the first line of a dataset file, the number of data points (n) and the dimensionality of the data (d) is set, separated by a single space. The remaining lines correspond to the coordinates of data points. Each line contains the values of the d features of a sample, where x_ij correspond to the j-th feature of the i-th sample of the data. Each feature value is separated by a single space, as depicted in the scheme below:
 
-|   n    |    d   |        |       |        |
-|--------|--------|--------|-------|--------|
-| x_{11} | x_{12} | x_{13} |  ...  | x_{1d} |
-| x_{21} | x_{22} | x_{23} |  ...  | x_{2d} |
-|  ...   |  ...   |  ...   |  ...  |  ...   |
-| x_{n1} | x_{n2} | x_{n3} |  ...  | x_{nd} |
+|  n   |   d  |      |     |      |
+|------|------|------|-----|------|
+| x_11 | x_12 | x_13 | ... | x_1d |
+| x_21 | x_22 | x_23 | ... | x_2d |
+| .... | .... | .... | ... | .... |
+| x_n1 | x_n2 | x_n3 | ... | x_nd |
+
+Some datasets are provided in `/data` folder.
 
 **Labels files.** The content of a labels file exhibits the cluster of each sample of the dataset according to ground-truth, where y_i correspond to the label of the i-th sample:
 
-| y_1 |
+y_1
 
-| y_2 |
+y_2
 
-| ... |
+...
 
-| y_n |
+y_n
+
+For some datasets, labels are provided in `/labels` folder.
 
 ## Output file
 
 After the execution of the algorithm, output files are saved in `/out` folder, with the following header:
 
 | Pi_min | N2 | Dataset | m | SolutionCost | Time(s) |
+
+If external clustering evaluation is done, the following header is produced:
+
+| Pi_min | N2 | Dataset | m | SolutionCost | Time(s) | C-Rand | NMI | CentroidIndex
