@@ -35,7 +35,7 @@ namespace MathUtils {
         return(s.replace(s.find(toReplace), toReplace.length(), replaceWith));
     }
 
-    double SquaredEuclidean(vector<double> & a, vector<double> & b, int d) { // O(d)
+    double SquaredEuclidean(const vector<double> & a, const vector<double> & b, int d) { // O(d)
         double dist = 0.0;
         for(int i = 0; i < d; i++) {
             dist = dist + ( (a[i] - b[i]) * (a[i] - b[i]) );

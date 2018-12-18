@@ -33,7 +33,7 @@ struct KeyHash {
 struct KeyEqual {
     public:
     bool operator () ( const Item& x, const Item& y ) const {
-        if ( !(x.cost > y.cost - 0.00001 && x.cost < y.cost + 0.00001) ) {
+        if ( !(x.cost > y.cost - 0.00000001 && x.cost < y.cost + 0.00000001) ) {
             return false;
         }
         for(int i = 0; i < x.cardinality.size(); i++) {
@@ -69,7 +69,7 @@ namespace MathUtils {
     std::string ReplaceString(std::string s, const std::string &toReplace, const std::string &replaceWith);
 
     // Squared Euclidean distance of two general data points in R^d
-    double SquaredEuclidean(vector<double> & a, vector<double> & b, int d);
+    double SquaredEuclidean(const vector<double> & a, const vector<double> & b, int d);
 
     // Squared Euclidean distance of a point (given by its index in the dataset) to a centroid
     double PointCenterDist(int p, vector<double> & center, int d, double* data);

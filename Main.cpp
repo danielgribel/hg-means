@@ -52,8 +52,8 @@ class InputValidator {
                 for(int i = 5; i < argc; i++) {
                     nb_clusters.push_back(atoi(argv[i]));
                 }
-                if (dataset_path.find(DATA_PATH) != std::string::npos &&
-                    dataset_path.find(".txt") != std::string::npos) {
+                if (dataset_path.find(DATA_PATH) != string::npos &&
+                    dataset_path.find(".txt") != string::npos) {
                     dataset_name = ReplaceString(dataset_path, DATA_PATH, "");
                     dataset_name = ReplaceString(dataset_name, ".txt", "");
                 }
@@ -68,14 +68,17 @@ class InputValidator {
 
         int GetMaxIt() { return max_it; };
 
-        bool IsExternalEval() { return external_eval; };
+        bool ExternalEval() { return external_eval; };
 
         vector<int> GetNbClusters() { return nb_clusters; };
 
         bool Validate() {
 
+            // At least 6 parameters should be provided:
+            // Program name, dataset, size of population, maximum iterations, evaluation and number of clusters
             if(nb_arg < 6) {
-                cerr << "Insufficient number of parameters" << endl;
+                cerr << "Insufficient number of parameters provided. Please use the following input format:" << 
+                endl << "./hgmeans DatasetPath Pi_min N2 Evaluate [M]" << endl;
                 return false;
             }
             
@@ -86,7 +89,7 @@ class InputValidator {
                 return false;
             }
 
-            // Defining bounds on variables
+            // Checking bounds of variables
             if(pi_min < 1 || pi_min > 100000) {
                 cerr << "Pi_min out of bounds" << endl;
                 return false;
@@ -112,23 +115,22 @@ class InputValidator {
         }
 };
 
-
 void SaveOutput(ofstream& writer_output, stringstream& filename_output, GeneticOperations* genetic, double elapsedSecs) {
-    Param prm = genetic->GetParam();
+    Param param = genetic->GetParam();
     int m = genetic->GetPbData().GetM();
     string instance = genetic->GetPbData().GetInstanceName();
     Solution* solution = genetic->GetBestSolution();
     
     writer_output.open (filename_output.str().c_str(), ofstream::out | ofstream::app);  
-    writer_output << prm.size_population << " ";
-    writer_output << prm.max_it << " ";
+    writer_output << param.size_population << " ";
+    writer_output << param.max_it << " ";
     writer_output << instance << " ";
     writer_output << m << " ";
     writer_output << fixed << setprecision(10) << solution->GetCost() << " ";
     writer_output << fixed << setprecision(4) << elapsedSecs;
 
     // Attach clustering indexes to output
-    if(prm.eval && genetic->GetPbData().GetNbClasses() == m) {
+    if(param.eval && genetic->GetPbData().GetNbClasses() == m) {
         writer_output << " ";
         writer_output << fixed << setprecision(4) << solution->GetCRand() << " ";
         writer_output << fixed << setprecision(4) << solution->GetNmi() << " ";
@@ -138,17 +140,39 @@ void SaveOutput(ofstream& writer_output, stringstream& filename_output, GeneticO
     writer_output.close();
 }
 
-void Run(int seed, PbData pb_data, const Dataset* x) {
-    srand(seed);
+void PrintResult(GeneticOperations* genetic, double cpu_time) {
+    Solution* best_solution = genetic->GetBestSolution();
+    PbData pb_data = genetic->GetPbData();
+    Param param = genetic->GetParam();
 
-    ofstream writer_output;
+    cout << "-- Optimization finished: Solution objective = " << best_solution->GetCost() << " | CPU time = " << cpu_time << " s";
+    
+    if(param.eval && pb_data.GetNbClasses() == pb_data.GetM()) {
+        cout << setprecision(4) << " | C-Rand = " << best_solution->GetCRand();
+        cout << setprecision(4) << " | NMI = " << best_solution->GetNmi();
+        cout << setprecision(4) << " | CI = " << best_solution->GetCentroidIndex();
+    }
+    cout << endl << endl;
+}
+
+string FilenameOutput(PbData pb_data) {
     stringstream filename_output;
 
     filename_output << "out/" << pb_data.GetInstanceName() << '_' <<
                 setw(3) << setfill('0') << pb_data.GetM() << "_" <<
                 pb_data.GetParam().size_population << '_' <<
                 pb_data.GetParam().max_it << ".out";
+    
+    return filename_output.str();
+}
 
+void Run(int seed, PbData pb_data, const Dataset* x) {
+    srand(seed);
+
+    ofstream writer_output;
+    stringstream filename_output;
+    filename_output << FilenameOutput(pb_data);
+    
     // Clean file content if it already exists
     if(SAVE_FILE) {
         writer_output.open (filename_output.str().c_str());
@@ -161,25 +185,23 @@ void Run(int seed, PbData pb_data, const Dataset* x) {
         // Create GeneticOperations instance
         GeneticOperations* genetic = new GeneticOperations(pb_data);
 
+        cout << "-- Starting optimization: " << pb_data.GetInstanceName()  << " dataset | m = " << pb_data.GetM() << " clusters" << endl;
+
         // Run HG-Means algorithm
         genetic->HGMeans(x);
         
-        Solution * s = genetic->GetBestSolution();
-
         // Measure cpu time in seconds
-        double elapsedSecs = double(clock() - begin) / CLOCKS_PER_SEC;
+        double cpu_time = double(clock() - begin) / CLOCKS_PER_SEC;
 
-        cout << pb_data.GetInstanceName() << " " << pb_data.GetM() << " " << s->GetCost() << " " << elapsedSecs;
-        
         if (pb_data.GetParam().eval && pb_data.GetM() == pb_data.GetNbClasses()) {
-            s->ComputeExternalMetrics(pb_data.GetTruthAssignment());
-            cout << " " << s->GetCRand() << " " << s->GetNmi() << " " << s->GetCentroidIndex();
+            genetic->GetBestSolution()->ComputeExternalMetrics(pb_data.GetTruthAssignment());
         }
-        cout << endl;
+
+        PrintResult(genetic, cpu_time);
 
         if(SAVE_FILE) {
             // Save output results 
-            SaveOutput(writer_output, filename_output, genetic, elapsedSecs);
+            SaveOutput(writer_output, filename_output, genetic, cpu_time);
         }
         delete genetic;
     }
@@ -189,7 +211,7 @@ Param LoadParam(InputValidator command) {
     Param param;
     param.size_population = command.GetPiMin();
     param.max_it = command.GetMaxIt();
-    param.eval = command.IsExternalEval();
+    param.eval = command.ExternalEval();
     param.w = 2;
     param.mutation = 1;
     param.nb_runs = 1;
@@ -238,8 +260,10 @@ int main(int argc, char** argv) {
         PbData pb_data(command.GetDatasetName(), x->data, x->n, x->d, param);
 
         for(int i = 0; i < command.GetNbClusters().size(); i++) {
-            pb_data.SetM(command.GetNbClusters()[i]);
-            Run(16007, pb_data, x);
+            if(command.GetNbClusters()[i] <= pb_data.GetN()) { // m <= n
+                pb_data.SetM(command.GetNbClusters()[i]);
+                Run(16007, pb_data, x);
+            }
         }
         delete x;
     }
