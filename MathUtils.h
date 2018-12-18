@@ -33,7 +33,7 @@ struct KeyHash {
 struct KeyEqual {
     public:
     bool operator () ( const Item& x, const Item& y ) const {
-        if ( !(x.cost > y.cost - 0.00000001 && x.cost < y.cost + 0.00000001) ) {
+        if ( !(x.cost > y.cost - 0.00001 && x.cost < y.cost + 0.00001) ) {
             return false;
         }
         for(int i = 0; i < x.cardinality.size(); i++) {
