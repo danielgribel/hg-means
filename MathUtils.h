@@ -26,7 +26,7 @@ struct KeyHash {
         for(int i = 0; i < x.cardinality.size(); i++) {
             seed = seed + (i+1)*x.cardinality[i];
         }
-        return long(x.cost + seed) % 997;
+        return long(x.cost + seed) % 99991;
     }
 };
 
