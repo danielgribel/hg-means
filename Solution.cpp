@@ -403,8 +403,10 @@ void Solution::ComputeCentroidIndex(Solution* ground_truth) {
 	centroid_index = ci;
 }
 
-void Solution::ComputeExternalMetrics(Solution* ground_truth) {
+void Solution::ComputeExternalMetrics(unsigned short* assignment) {
+    Solution* ground_truth = new Solution(assignment, 0.0, pb_data);
     ComputeCRand(ground_truth);
     ComputeNmi(ground_truth);
     ComputeCentroidIndex(ground_truth);
+    delete ground_truth;
 }

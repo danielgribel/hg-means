@@ -67,7 +67,7 @@ class GeneticOperations {
 
     public:
         
-        GeneticOperations(PbData pb_data, Param param);
+        GeneticOperations(PbData pb_data);
 
         ~GeneticOperations();
 

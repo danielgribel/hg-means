@@ -1,8 +1,8 @@
 #include "GeneticOperations.h"
 
-GeneticOperations::GeneticOperations(PbData pb_data, Param param) {
+GeneticOperations::GeneticOperations(PbData pb_data) {
     this->pb_data = pb_data;
-    this->param = param;
+    this->param = pb_data.GetParam();
 }
 
 GeneticOperations::~GeneticOperations() {

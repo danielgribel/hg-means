@@ -128,7 +128,7 @@ class Solution {
         // Calculate the Centroid Index indicator
         void ComputeCentroidIndex(Solution* ground_truth);
 
-        void ComputeExternalMetrics(Solution* ground_truth);
+        void ComputeExternalMetrics(unsigned short* assignment);
 
         double GetCRand() { return crand; };
 
