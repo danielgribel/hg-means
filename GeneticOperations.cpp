@@ -202,7 +202,7 @@ void GeneticOperations::SelectSurvivors(const Dataset* x) { // O(max_population 
     ResetPopulation(heap_individuals, heap_clones);
 }
 
-vector<long> GeneticOperations::MinAssignment(vector< vector<double> > c1, vector< vector<double> > c2) { //O(m^2d)
+vector<long> GeneticOperations::MinAssignment(vector< vector<double> > & c1, vector< vector<double> > & c2) { //O(m^2d)
     int m = pb_data.GetM();
     int d = pb_data.GetD();
 

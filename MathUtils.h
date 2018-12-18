@@ -54,7 +54,7 @@ namespace MathUtils {
 	const int MAX_INT = std::numeric_limits<int>::max();
 
     // Given a vector of numbers, find the corresponding index of a given value
-    int FindIndex(std::vector<double> values, double key, int first, int last);
+    int FindIndex(std::vector<double> & values, double key, int first, int last);
     
     // Generate a random number within the given range
     double RandBetween(double min, double max);
@@ -69,10 +69,10 @@ namespace MathUtils {
     std::string ReplaceString(std::string s, const std::string &toReplace, const std::string &replaceWith);
 
     // Squared Euclidean distance of two general data points in R^d
-    double SquaredEuclidean(vector<double> a, vector<double> b, int d);
+    double SquaredEuclidean(vector<double> & a, vector<double> & b, int d);
 
     // Squared Euclidean distance of a point (given by its index in the dataset) to a centroid
-    double PointCenterDist(int p, vector<double> center, int d, double* data);
+    double PointCenterDist(int p, vector<double> & center, int d, double* data);
 }
 
 #endif

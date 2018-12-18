@@ -39,7 +39,7 @@ class GeneticOperations {
         Param param;
 
         // Get the minimum assignment between two centroids. Hungarian method of Dlib is used
-        vector<long> MinAssignment(vector< vector<double> > c1, vector< vector<double> > c2);
+        vector<long> MinAssignment(vector< vector<double> > & c1, vector< vector<double> > & c2);
         
         // Generate a solution for MSSC with initial centers randomly chosen 
         unsigned short* GetKmeansAssignment(const Dataset* x);

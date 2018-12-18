@@ -4,7 +4,7 @@ using namespace std;
 
 namespace MathUtils {
     
-    int FindIndex(vector<double> values, double key, int first, int last) {
+    int FindIndex(vector<double> & values, double key, int first, int last) {
         if(values[first] <= key && values[first + 1] >= key) {
             return first;
         }
@@ -35,7 +35,7 @@ namespace MathUtils {
         return(s.replace(s.find(toReplace), toReplace.length(), replaceWith));
     }
 
-    double SquaredEuclidean(vector<double> a, vector<double> b, int d) { // O(d)
+    double SquaredEuclidean(vector<double> & a, vector<double> & b, int d) { // O(d)
         double dist = 0.0;
         for(int i = 0; i < d; i++) {
             dist = dist + ( (a[i] - b[i]) * (a[i] - b[i]) );
@@ -43,10 +43,11 @@ namespace MathUtils {
         return dist;
     }
 
-    double PointCenterDist(int p, vector<double> center, int d, double *data) { // O(d)
+    double PointCenterDist(int p, vector<double> & center, int d, double *data) { // O(d)
         double dist = 0.0;
         for(int i = 0; i < d; i++) {
-            dist = dist + ( (data[p*d+i] - center[i])*(data[p*d+i] - center[i]) );
+			double temp = data[p*d + i] - center[i];
+            dist += temp*temp;
         }
         return dist;
     }
