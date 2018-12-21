@@ -6,9 +6,9 @@ Original files and complete source code of Greg Hamerly K-means can be found at:
 
 ## Related Article
 
-*HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering*. Technical Report PUC-Rio - arXiv 1804.09813. Gribel, D.; Vidal, T.
+*HG-MEANS: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering*. Gribel, D.; Vidal, T., 2018.
 
-https://arxiv.org/abs/1804.09813
+https://www.sciencedirect.com/science/article/pii/S0031320318304436
 
 ## Run
 
@@ -18,21 +18,21 @@ To run the algorithm, try the following sequence of commands:
 
 `> make`
 
-`> ./hgmeans "DatasetPath" Pi_min N2 Evaluate [M]`
+`> ./hgmeans "Dataset_Path" Pi_min N2 Evaluate [M]`
 
 ### Example
 
 `> make`
 
-`> ./hgmeans "data/fisher.txt" 10 5000 0 2 5 10`
+`> ./hgmeans "data/iris.txt" 10 5000 0 2 5 10`
 
-This script executes HG-means algorithm for "fisher" dataset, with 10 solutions in population, a maximum of 5000 iterations, no external evaluation; and 2, 5 and 10 clusters.
+This script executes HG-means algorithm for "iris" dataset, with 10 solutions in population, a maximum of 5000 iterations, no external evaluation; and 2, 5 and 10 clusters.
 
 After the execution of the algorithm, output files will be saved in `/out` folder.
 
 ### Parameters of the algorithm
 
-`DatasetPath`: The path of dataset. Datasets should be placed in /data folder.
+`Dataset_Path`: The path of dataset. Datasets should be placed in `/data` folder.
 
 `Pi_min` (default=10): Population size. Determines the size of the population in the genetic algorithm.
 
