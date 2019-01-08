@@ -6,9 +6,9 @@ Original files and complete source code of Greg Hamerly K-means can be found at:
 
 ## Related Article
 
-*HG-MEANS: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering*. Gribel, D.; Vidal, T., 2018.
+*HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering*. D. Gribel and T. Vidal. Pattern Recognition, https://doi.org/10.1016/j.patcog.2018.12.022
 
-https://www.sciencedirect.com/science/article/pii/S0031320318304436
+https://authors.elsevier.com/c/1YIIy77nKSc2q
 
 ## Run
 
