@@ -1,14 +1,14 @@
 # HG-means
 
-Source code of HG-means clustering, an efficient hybrid genetic algorithm proposed for minimum sum-of-squares clustering (MSSC). This population-based metaheuristic uses K-means as a local search in combination with crossover, mutation, and diversification operators. As HG-means algorithm uses K-means, we included the fundamental source files of the fast K-means implementation of Greg Hamerly (to whom we are grateful to make available the source code) in this repository.
+Source code of HG-means clustering, an efficient hybrid genetic algorithm proposed for the minimum sum-of-squares clustering (MSSC). This population-based metaheuristic uses K-means as a local search in combination with crossover, mutation, and diversification operators.
 
-Original files and complete source code of Greg Hamerly K-means can be found at: https://github.com/ghamerly/fast-kmeans
+As HG-means algorithm uses K-means, we included the fundamental source files of the fast K-means implementation of Greg Hamerly (to whom we are grateful to make available the source code) in this repository, under the folder `/hamerly`. Original files and complete source code of Greg Hamerly K-means can be found at: https://github.com/ghamerly/fast-kmeans.
+
+For the exact crossover, HG-means uses the implementation of Dlib (https://github.com/davisking/dlib) for solving an assignment problem. Dlib files are included in `/dlib-master` folder.
 
 ## Related Article
 
-*HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering*. D. Gribel and T. Vidal. Pattern Recognition, https://doi.org/10.1016/j.patcog.2018.12.022
-
-https://authors.elsevier.com/c/1YIIy77nKSc2q
+*HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering*. D. Gribel and T. Vidal, 2018. Pattern Recognition, https://doi.org/10.1016/j.patcog.2018.12.022
 
 ## Run
 
