@@ -89,4 +89,4 @@ y_2
 
 y_n
 
-**Important**: Labels files must have '.label' extension. Some labels are provided in `/data` folder in HG-means repository.
+**Important**: Labels files must have the '.label' extension. Some labels are provided in `/data` folder in HG-means repository.
