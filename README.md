@@ -43,18 +43,14 @@ This script executes HG-means clustering for "iris" dataset, with 10 solutions i
 `[nb_clusters]`: The list with number of clusters. You can pass multiple values, separated by a single space.
 
 ### Python
-
-HG-means is also available as a Python package.
-
-If you use Windows, please install C++ Build tools, which can be downloaded here: https://go.microsoft.com/fwlink/?LinkId=691126
-
 <!-- Firstly, you should have Cython installed. To install Cython, please refer to the official installation page:
-
 https://cython.readthedocs.io/en/latest/src/quickstart/install.html -->
 
-To install HG-means, run the following installation command:
+HG-means is also available as a Python package. To install HG-means, run the following installation command:
 
 `> python -m pip install hgmeans`
+
+For Windows users that do not have a C++ compiler, it may be required an installation of C++ Build tools, which can be downloaded here: https://go.microsoft.com/fwlink/?LinkId=691126
 
 That is it! Now, open your Python interface, import the package and create an instance of HG-means. To execute it, just call function `Go()` with the corresponding parameters. See an example below:
 
