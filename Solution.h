@@ -63,7 +63,7 @@ class Solution {
         void InitCentroids();
 
         // Count coefficients for Rand and C-Rand indicators
-        void CountRandCoefficients(Solution* ground_truth, int& a, int& b, int& c, int& d);
+        void CountRandCoefficients(unsigned short* ground_truth, int& a, int& b, int& c, int& d);
 
         // Remove random center and re-assign data points to closest remaining center
         // Partial assignment with m-1 centers is generated
@@ -120,15 +120,15 @@ class Solution {
         /* External Clustering measures */
 
         // Calculate the C-Rand indicator
-        void ComputeCRand(Solution* ground_truth);
+        void ComputeCRand();
 
         // Calculate the Normalized mutual information indicator
-        void ComputeNmi(Solution* ground_truth);
+        void ComputeNmi();
 
         // Calculate the Centroid Index indicator
-        void ComputeCentroidIndex(Solution* ground_truth);
+        void ComputeCentroidIndex();
 
-        void ComputeExternalMetrics(unsigned short* assignment);
+        void ComputeExternalMetrics();
 
         double GetCRand() { return crand; };
 

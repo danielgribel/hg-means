@@ -10,7 +10,6 @@
 #include <fstream>
 
 #define DATA_PATH "data/"
-#define CLASS_PATH "labels/"
 
 using namespace std;
 
@@ -40,7 +39,6 @@ struct Param {
 
     // If evaluation is activated or not -- in terms of C-Rand, NMI, Centroid Index, etc
     bool eval;
-
 };
 
 /* PbData stores the information of the problem: instance name, features vector,
@@ -73,20 +71,21 @@ class PbData {
     
     public:
 
-        PbData(string instance_name, double* data, int n, int d, Param param) {
+        PbData(string path, string instance_name, double* data, int n, int d, Param param) {
             this->instance_name = instance_name;
             this->data = data;
             this->n = n;
             this->d = d;
             this->param = param;
-            if(param.eval) {
-                LoadGroundTruth();
-            }
+            this->truth_assignment = new unsigned short[n];
+            LoadGroundTruth(path);
         };
 
         PbData() {};
 
         ~PbData() {};
+
+        void DeleteGroundTruth() { delete [] truth_assignment; };
 
         string GetInstanceName() { return instance_name; };
 
@@ -106,15 +105,13 @@ class PbData {
 
         void SetM(int m) { this->m = m; };
 
-        void LoadGroundTruth() {
-            string file_labels = CLASS_PATH + instance_name + ".txt";
+        void LoadGroundTruth(string file_labels) {
             ifstream inputLabels(file_labels.c_str());
             if (! inputLabels) { // Verify if labels file was successfully loaded
-                cerr << "Unable to open labels file: " << file_labels << endl;
+                cerr << "No labels file provided at: " << file_labels << endl;
                 param.eval = false;
             } else {
                 nb_classes = 0;
-                truth_assignment = new unsigned short[n];
                 for (int i = 0; i < n; ++i) {
                     inputLabels >> truth_assignment[i];
                     truth_assignment[i] = truth_assignment[i] - 1; // Labels file starts from 1

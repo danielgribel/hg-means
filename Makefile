@@ -2,7 +2,7 @@
 MAKEFLAGS = -j 8
 
 # Compiler options
-#CPPFLAGS = -Wall -Werror -pedantic
+# CPPFLAGS = -Wall -Werror -pedantic
 CPPFLAGS += -g
 CPPFLAGS += -O3
 CPPFLAGS += -std=c++11
@@ -15,10 +15,10 @@ HAMERLY_DIR = hamerly
 SRC_HAMERLY = $(wildcard $(HAMERLY_DIR)/*.cpp)
 OBJ_HAMERLY = $(SRC_HAMERLY:.cpp=.o)
 
-SRC_COMMOM = $(filter-out Main.cpp, $(wildcard *.cpp))
+SRC_COMMOM = $(filter-out HGMeans.cpp HGWrapper.cpp, $(wildcard *.cpp))
 OBJ_COMMOM = $(SRC_COMMOM:.cpp=.o)
 
-SRC_HG = Main.cpp
+SRC_HG = HGMeans.cpp
 OBJ_HG = $(SRC_HG:.cpp=.o)
 
 all: hgmeans

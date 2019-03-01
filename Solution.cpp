@@ -271,13 +271,11 @@ void Solution::DoLocalSearch(Dataset const *x) {
     delete algorithm;
 }
 
-void Solution::CountRandCoefficients(Solution* ground_truth, int& a, int& b, int& c, int& d) {
+void Solution::CountRandCoefficients(unsigned short* y, int& a, int& b, int& c, int& d) {
 	a = 0;
 	b = 0;
 	c = 0;
 	d = 0;
-
-	unsigned short* y = ground_truth->GetAssignment();
 
 	for(int i = 0; i < pb_data.GetN(); i++) {
 		for(int j = i+1; j < pb_data.GetN(); j++) {
@@ -297,7 +295,8 @@ void Solution::CountRandCoefficients(Solution* ground_truth, int& a, int& b, int
 	}
 }
 
-void Solution::ComputeCRand(Solution* ground_truth) {
+void Solution::ComputeCRand() {
+    unsigned short* ground_truth = pb_data.GetTruthAssignment();
 	int a, b, c, d;
 	CountRandCoefficients(ground_truth, a, b, c, d);
 	int total = a + b + c + d;
@@ -307,17 +306,17 @@ void Solution::ComputeCRand(Solution* ground_truth) {
 
 // Implemented by @Carlo Nicolini
 // More information in the original repository: https://github.com/CarloNicolini/rnmi
-void Solution::ComputeNmi(Solution* ground_truth) {
+void Solution::ComputeNmi() {
+    unsigned short* ground_truth = pb_data.GetTruthAssignment();
 	int n = pb_data.GetN();
 	unsigned short* pa = assignment;
-	unsigned short* pb = ground_truth->GetAssignment();
 	int qa = -1;
 	int qb = -1;
 	vector <int > ga; // Group A
 	vector <int > gb; // Group B
 	for(int i = 0; i < n; i++) {
 		if(qa < pa[i]) qa = pa[i];
-		if(qb < pb[i]) qb = pb[i];
+		if(qb < ground_truth[i]) qb = ground_truth[i];
 	}
 	qa++;
 	qb++;
@@ -336,7 +335,7 @@ void Solution::ComputeNmi(Solution* ground_truth) {
         B.resize(qa); // Counting structure
         for(int i = 0; i < n; i++) {
             int q = pa[i];
-            int t = pb[i];
+            int t = ground_truth[i];
             ga[q]++;
             gb[t]++;
             int idx = -1;
@@ -378,18 +377,37 @@ void Solution::ComputeNmi(Solution* ground_truth) {
     }
 }
 
-void Solution::ComputeCentroidIndex(Solution* ground_truth) {
+void Solution::ComputeCentroidIndex() {
+    unsigned short* gt_assignment = pb_data.GetTruthAssignment();
 	int d = pb_data.GetD();
 	int m = pb_data.GetM();
 	double dist, mindist;
 	int cmin = -1;
 	vector<bool> orphan(m, true);
 	double ci = m;
+    double* data = pb_data.GetData();
+    vector<int> sizes(m, 0);
+    vector< vector<double> > gt_centroids (m, vector<double>(d, 0.0));
+
+    // Calculate centroids of ground-truth
+    for(int i = 0; i < pb_data.GetN(); i++) {
+        sizes[ gt_assignment[i] ]++;
+        for(int j = 0; j < d; j++) {
+            gt_centroids[ gt_assignment[i] ][j] = gt_centroids[ gt_assignment[i] ][j] + data[i*d+j];
+        }
+    }
+    for(int i = 0; i < m; i++) {
+        for(int j = 0; j < d; j++) {
+            if(sizes[i] != 0) {
+                gt_centroids[i][j] = (1.0*gt_centroids[i][j])/sizes[i];
+            }
+        }
+    }
 
     for(int i = 0; i < m; i++) {
 		mindist = MAX_FLOAT;
 		for(int j = 0; j < m; j++) {
-			dist = SquaredEuclidean(centroids[i], ground_truth->GetCentroids(j), d);
+			dist = SquaredEuclidean(centroids[i], gt_centroids[j], d);
 			if(dist < mindist) {
 				mindist = dist;
 				cmin = j;
@@ -400,14 +418,11 @@ void Solution::ComputeCentroidIndex(Solution* ground_truth) {
         }
 		orphan[cmin] = false;
 	}
-
 	centroid_index = ci;
 }
 
-void Solution::ComputeExternalMetrics(unsigned short* assignment) {
-    Solution* ground_truth = new Solution(assignment, 0.0, pb_data);
-    ComputeCRand(ground_truth);
-    ComputeNmi(ground_truth);
-    ComputeCentroidIndex(ground_truth);
-    delete ground_truth;
+void Solution::ComputeExternalMetrics() {
+    ComputeCRand();
+    ComputeNmi();
+    ComputeCentroidIndex();
 }
