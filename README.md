@@ -2,45 +2,69 @@
 
 Source code of HG-means clustering, an efficient hybrid genetic algorithm proposed for the minimum sum-of-squares clustering (MSSC). This population-based metaheuristic uses K-means as a local search in combination with crossover, mutation, and diversification operators.
 
-As HG-means algorithm uses K-means, we included the fundamental source files of the fast K-means implementation of Greg Hamerly (to whom we are grateful to make available the source code) in this repository, under the folder `/hamerly`. Original files and complete source code of Greg Hamerly K-means can be found at: https://github.com/ghamerly/fast-kmeans.
+As HG-means algorithm uses K-means, we included the fundamental source files of the fast K-means implementation of Greg Hamerly (to whom we are grateful for making the source code available) in this repository, under the folder `/hamerly`. Original files and complete source code of Greg Hamerly K-means can be found at: https://github.com/ghamerly/fast-kmeans.
 
 For the exact crossover, HG-means uses the implementation of Dlib (https://github.com/davisking/dlib) for solving an assignment problem. Dlib files are included in `/dlib-master` folder.
 
+HG-means clustering is available as a C++ code, as well as a Python package.
+
 ## Related Article
 
-*HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering*. D. Gribel and T. Vidal, 2018. Pattern Recognition, https://doi.org/10.1016/j.patcog.2018.12.022
+*HG-means: A scalable hybrid genetic algorithm for minimum sum-of-squares clustering*. D. Gribel and T. Vidal, 2019. Pattern Recognition, https://doi.org/10.1016/j.patcog.2018.12.022
 
-## Run
+## Installation and Run
 
-Firstly, make sure that the dataset is placed in `/data` folder.
+### C++
 
-To run the algorithm, try the following sequence of commands:
+To run the algorithm in C++, go to `/hgmeans` folder and try the following sequence of commands:
 
 `> make`
 
-`> ./hgmeans "Dataset_Path" Pi_min N2 Evaluate [M]`
+`> ./hgmeans 'dataset_path' pi_min n2 [nb_clusters]`
 
 ### Example
 
 `> make`
 
-`> ./hgmeans "data/iris.txt" 10 5000 0 2 5 10`
+`> ./hgmeans 'data/iris.txt' 10 5000 2 5 10`
 
-This script executes HG-means algorithm for "iris" dataset, with 10 solutions in population, a maximum of 5000 iterations, no external evaluation; and 2, 5 and 10 clusters.
+This script executes HG-means clustering for "iris" dataset, with 10 solutions in population, a maximum of 5000 iterations, and 2, 5 and 10 clusters.
 
-After the execution of the algorithm, output files will be saved in `/out` folder.
+**Important:** You can provide a ground-truth file with the labels of clusters. In this case, make sure that a file with the same name of the dataset and '.label' extension is placed in the same folder of the dataset. If this file is provided, HG-means clustering will compute clustering performance metrics. See section **Data format** to check the expected data format for datasets and labels files.
 
 ### Parameters of the algorithm
 
-`Dataset_Path`: The path of dataset. Datasets should be placed in `/data` folder.
+`dataset_path`: The path of dataset.
 
-`Pi_min` (default=10): Population size. Determines the size of the population in the genetic algorithm.
+`pi_min` (default = 10): Population size. Determines the size of the population in the genetic algorithm.
 
-`N2` (default=5000): Maximum number of iterations. Determines the total number of iterations the algorithm will take.
+`n2` (default = 5000): Maximum number of iterations. Determines the total number of iterations the algorithm will take.
 
-`Evaluate` (default=0): External clustering evaluation. Boolean parameter {0,1} for calculating external clustering measures. **Important:** If this parameter is set to 1, make sure that the ground-truth file is provided in `/labels` folder with the same name of the dataset.
+`[nb_clusters]`: The list with number of clusters. You can pass multiple values, separated by a single space.
 
-`[M]`: The list of number of clusters m (1 <= m <= n). You can pass multiple values for m, separated by a single space.
+### Python
+
+HG-means is also available as a Python package.
+
+If you use Windows, please install C++ Build tools, which can be downloaded here: https://go.microsoft.com/fwlink/?LinkId=691126
+
+<!-- Firstly, you should have Cython installed. To install Cython, please refer to the official installation page:
+
+https://cython.readthedocs.io/en/latest/src/quickstart/install.html -->
+
+To install HG-means, run the following installation command:
+
+`> python -m pip install hgmeans`
+
+That is it! Now, open your Python interface, import the package and create an instance of HG-means. To execute it, just call function `Go()` with the corresponding parameters. See an example below:
+
+`>>> import hgmeans`
+
+`>>> my_demo = hgmeans.PyHGMeans()`
+
+`>>> my_demo.Go('data/iris.txt', 10, 5000, [2,5,10])`
+
+This script executes HG-means algorithm for "iris" dataset, with 10 solutions in population, a maximum of 5000 iterations, and 2, 5 and 10 clusters. Here the number of clusters is passed in an array, so values are separated by commas.
 
 ## Data format
 
@@ -53,7 +77,7 @@ After the execution of the algorithm, output files will be saved in `/out` folde
 | .... | .... | .... | ... | .... |
 | x_n1 | x_n2 | x_n3 | ... | x_nd |
 
-Some datasets are provided in `/data` folder.
+Some datasets are provided in `/data` folder in HG-means repository.
 
 **Labels files.** The content of a labels file exhibits the cluster of each sample of the dataset according to ground-truth, where y_i correspond to the label of the i-th sample:
 
@@ -65,14 +89,4 @@ y_2
 
 y_n
 
-For some datasets, labels are provided in `/labels` folder.
-
-## Output file
-
-After the execution of the algorithm, output files are saved in `/out` folder, with the following header:
-
-| Pi_min | N2 | Dataset | m | SolutionCost | Time(s) |
-
-If external clustering evaluation is done, the following header is produced:
-
-| Pi_min | N2 | Dataset | m | SolutionCost | Time(s) | C-Rand | NMI | CentroidIndex
+**Important**: Labels files must have '.label' extension. Some labels are provided in `/data` folder in HG-means repository.
