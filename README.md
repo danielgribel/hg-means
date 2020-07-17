@@ -50,6 +50,8 @@ HG-means is also available as a Python package. To install HG-means, run the fol
 
 `> python -m pip install hgmeans`
 
+**Important:** Check your user permission for pip installation. You may need to log with a root user.
+
 For Windows users that do not have a C++ compiler, it may be required an installation of C++ Build tools, which can be downloaded here: https://go.microsoft.com/fwlink/?LinkId=691126
 
 That is it! Now, open your Python interface, import the package and create an instance of HG-means. To execute it, just call function `Go()` with the corresponding parameters. See an example below:
@@ -59,6 +61,10 @@ That is it! Now, open your Python interface, import the package and create an in
 `>>> my_demo = hgmeans.PyHGMeans()`
 
 `>>> my_demo.Go('data/iris.txt', 10, 5000, [2,5,10])`
+
+**Important:** If you use Python version >= 3, you may need to encode the dataset path with UTF-8. In this case, run:
+
+`>>> my_demo.Go('data/iris.txt'.encode('utf-8'), 10, 5000, [2,5,10])`
 
 This script executes HG-means algorithm for "iris" dataset, with 10 solutions in population, a maximum of 5000 iterations, and 2, 5 and 10 clusters. Here the number of clusters is passed in an array, so values are separated by commas.
 
