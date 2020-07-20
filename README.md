@@ -20,15 +20,15 @@ To run the algorithm in C++, go to `/hgmeans` folder and try the following seque
 
 `> make`
 
-`> ./hgmeans 'dataset_path' pi_min n2 [nb_clusters]`
+`> ./hgmeans 'dataset_path' pi_min n2 it [nb_clusters] 'w'`
 
 ### Example
 
 `> make`
 
-`> ./hgmeans 'data/iris.txt' 10 5000 2 5 10`
+`> ./hgmeans 'data/iris.txt' 10 5000 1 2 5 10 'w'`
 
-This script executes HG-means clustering for "iris" dataset, with 10 solutions in population, a maximum of 5000 iterations, and 2, 5 and 10 clusters.
+This script executes HG-means clustering for "iris" dataset, with 10 solutions in population, a maximum of 5000 iterations, 1 iteration (algorithm repetition), and 2, 5 and 10 clusters.
 
 **Important:** You can provide a ground-truth file with the labels of clusters. In this case, make sure that a file with the same name of the dataset and '.label' extension is placed in the same folder of the dataset. If this file is provided, HG-means clustering will compute clustering performance metrics. See section **Data format** to check the expected data format for datasets and labels files.
 
@@ -40,7 +40,11 @@ This script executes HG-means clustering for "iris" dataset, with 10 solutions i
 
 `n2` (default = 5000): Maximum number of iterations. Determines the total number of iterations the algorithm will take.
 
+`it` (default = 1): The number of independent repetitions of the algorithm.
+
 `[nb_clusters]`: The list with number of clusters. You can pass multiple values, separated by a single space.
+
+`w`: A flag for saving the results in a file. Use 'w' if you wish to active this feature, or leave it blank. Important: the output file is saved in your current directory, within the folder `hgm_out`.
 
 ### Python
 <!-- Firstly, you should have Cython installed. To install Cython, please refer to the official installation page:
@@ -50,23 +54,19 @@ HG-means is also available as a Python package. To install HG-means, run the fol
 
 `> python -m pip install hgmeans`
 
-**Important:** Check your user permission for pip installation. You may need to log with a root user.
+**Important:** Check your user permissions for pip installation. You may need root user credentials.
 
-For Windows users that do not have a C++ compiler, it may be required an installation of C++ Build tools, which can be downloaded here: https://go.microsoft.com/fwlink/?LinkId=691126
+For Windows users who do not have a C++ compiler, it may be required an installation of C++ Build tools, which can be downloaded here: https://go.microsoft.com/fwlink/?LinkId=691126
 
-That is it! Now, open your Python interface, import the package and create an instance of HG-means. To execute it, just call function `Go()` with the corresponding parameters. See an example below:
+That is it! Now, open your Python interface, import the package and create an instance of HG-means. To execute it, just call the function `run()` with the corresponding parameters. See an example below:
 
 `>>> import hgmeans`
 
-`>>> my_demo = hgmeans.PyHGMeans()`
+`>>> demo = hgmeans.PyHGMeans()`
 
-`>>> my_demo.Go('data/iris.txt', 10, 5000, [2,5,10])`
+`>>> demo.run('data/iris.txt', 10, 5000, 1, [2,5,10], 'w')`
 
-**Important:** If you use Python version >= 3, you may need to encode the dataset path with UTF-8. In this case, run:
-
-`>>> my_demo.Go('data/iris.txt'.encode('utf-8'), 10, 5000, [2,5,10])`
-
-This script executes HG-means algorithm for "iris" dataset, with 10 solutions in population, a maximum of 5000 iterations, and 2, 5 and 10 clusters. Here the number of clusters is passed in an array, so values are separated by commas.
+This script executes HG-means clustering for the "iris" dataset, with 10 solutions in population, a maximum of 5000 iterations, 1 repetition, and 2, 5 and 10 clusters. Here the number of clusters is passed in an array, so values are separated by commas.
 
 ## Data format
 
