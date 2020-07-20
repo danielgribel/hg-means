@@ -44,7 +44,7 @@ This script executes HG-means clustering for "iris" dataset, with 10 solutions i
 
 `[nb_clusters]`: The list with number of clusters. You can pass multiple values, separated by a single space.
 
-`w`: A flag for saving the results in a file. Use 'w' if you wish to active this feature, or leave it blank. Important: the output file is saved in your current directory, within the folder `hgm_out`.
+`w`: A flag for saving the results in a file. Use 'w' if you wish to active this feature, or leave it blank. Important: the output files are saved in your current directory, within the folder `hgm_out`.
 
 ### Python
 <!-- Firstly, you should have Cython installed. To install Cython, please refer to the official installation page:
@@ -91,4 +91,4 @@ y_2
 
 y_n
 
-**Important**: Labels files must have the '.label' extension. Some labels are provided in `/data` folder in HG-means repository.
+**Important**: Labels files must have the `.label` extension. Some labels are provided in `/data` folder in HG-means repository.
