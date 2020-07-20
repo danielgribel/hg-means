@@ -4,6 +4,28 @@
 
 #include "HGMeans.h"
 
+void SaveHeader(ofstream& writer_output, stringstream& filename_output, PbData pb_data) {
+    writer_output.open (filename_output.str().c_str());
+    // Write the header
+    string header = string("DATASET ") +
+                    "NB_CLUSTERS " +
+                    "SIZE_POPULATION " +
+                    "MAX_IT " +
+                    "OBJECTIVE " +
+                    "TIME";
+
+    if(pb_data.GetParam().eval && pb_data.GetNbClasses() == pb_data.GetM()) {
+        header = header + " CRAND " + "NMI " + "CI";
+    }
+    
+    for (int i = 0; i < pb_data.GetN(); ++i) {
+        header = header + " X" + to_string(i+1);
+    }
+    
+    writer_output << header << " " << "\n";
+    writer_output.close();
+}
+
 void SaveOutput(ofstream& writer_output, stringstream& filename_output, GeneticOperations* genetic, double elapsedSecs) {
     Param param = genetic->GetParam();
     int m = genetic->GetPbData().GetM();
@@ -11,10 +33,11 @@ void SaveOutput(ofstream& writer_output, stringstream& filename_output, GeneticO
     Solution* solution = genetic->GetBestSolution();
     
     writer_output.open (filename_output.str().c_str(), ofstream::out | ofstream::app);  
-    writer_output << param.size_population << " ";
-    writer_output << param.max_it << " ";
+
     writer_output << instance << " ";
     writer_output << m << " ";
+    writer_output << param.size_population << " ";
+    writer_output << param.max_it << " ";
     writer_output << fixed << setprecision(10) << solution->GetCost() << " ";
     writer_output << fixed << setprecision(4) << elapsedSecs;
 
@@ -25,6 +48,11 @@ void SaveOutput(ofstream& writer_output, stringstream& filename_output, GeneticO
         writer_output << fixed << setprecision(4) << solution->GetNmi() << " ";
         writer_output << fixed << setprecision(4) << solution->GetCentroidIndex();
     }
+
+    for (int i = 0; i < genetic->GetPbData().GetN(); ++i) {
+        writer_output << " " << solution->GetAssignment()[i] + 1;
+    }
+
     writer_output << "\n";
     writer_output.close();
 }
@@ -48,10 +76,25 @@ void PrintResult(GeneticOperations* genetic, double cpu_time) {
     cout << endl;
 }
 
-string FilenameOutput(PbData pb_data) {
+string FilenameOutput(PbData pb_data, bool save) {
     stringstream filename_output;
 
-    filename_output << "out/" << pb_data.GetInstanceName() << '_' <<
+    string out_folder = "hgm_out/";
+    mode_t mode = 0733; // UNIX style permissions
+    int result = 0;
+
+    if(save) {
+        #if defined(_WIN32)
+            result = _mkdir(out_folder.c_str()); // can be used on Windows
+        #else 
+            result = mkdir(out_folder.c_str(), mode); // can be used on non-Windows
+        #endif
+        // if (result != 0) {
+        //     cout << "No output directory created at /hg-means. It already exists, or writing permissions should be checked." << endl;
+        // }
+    }
+
+    filename_output << out_folder << pb_data.GetInstanceName() << '_' <<
                 setw(3) << setfill('0') << pb_data.GetM() << "_" <<
                 pb_data.GetParam().size_population << '_' <<
                 pb_data.GetParam().max_it << ".out";
@@ -59,17 +102,16 @@ string FilenameOutput(PbData pb_data) {
     return filename_output.str();
 }
 
-void Run(int seed, PbData pb_data, const Dataset* x) {
+void Run(int seed, PbData pb_data, const Dataset* x, bool save) {
     srand(seed);
 
     ofstream writer_output;
     stringstream filename_output;
-    filename_output << FilenameOutput(pb_data);
+    filename_output << FilenameOutput(pb_data, save);
     
     // Clean file content if it already exists
-    if(SAVE_FILE) {
-        writer_output.open (filename_output.str().c_str());
-        writer_output.close();
+    if(save) {
+        SaveHeader(writer_output, filename_output, pb_data);
     }
 
     for(int i = 0; i < pb_data.GetParam().nb_runs; i++) {
@@ -92,7 +134,7 @@ void Run(int seed, PbData pb_data, const Dataset* x) {
 
         PrintResult(genetic, cpu_time);
 
-        if(SAVE_FILE) {
+        if(save) {
             // Save output results 
             SaveOutput(writer_output, filename_output, genetic, cpu_time);
         }
@@ -106,7 +148,7 @@ Param LoadParam(InputValidator command) {
     param.max_it = command.GetMaxIt();
     param.w = 2;
     param.mutation = 1;
-    param.nb_runs = 1;
+    param.nb_runs = command.GetNbIt();
     param.eval = true;
     param.max_population = 2*param.size_population;
     param.no_improvement_it = param.max_it/10;
@@ -143,9 +185,9 @@ HGMeans::~HGMeans() {
 
 }
 
-void HGMeans::Go(char* filename, int size_population, int it, const std::vector<int>& m) {
+void HGMeans::Go(char* filename, int size_population, int max_it, int nb_it, const std::vector<int>& m, bool save) {
     string filenme_str(filename);
-    InputValidator command(filenme_str, size_population, it, m);
+    InputValidator command(filenme_str, size_population, max_it, nb_it, m);
 
     if(command.Validate()) {
         Param param = LoadParam(command);
@@ -158,7 +200,7 @@ void HGMeans::Go(char* filename, int size_population, int it, const std::vector<
         for(int i = 0; i < command.GetNbClusters().size(); i++) {
             if(command.GetNbClusters()[i] < pb_data.GetN()) { // m <= n
                 pb_data.SetM(command.GetNbClusters()[i]);
-                Run(16007, pb_data, x);
+                Run(16007, pb_data, x, save);
             } else {
                 cerr << "The number of clusters must be less than " << x->n << " (number of data points)" << endl;
             }
@@ -170,15 +212,26 @@ void HGMeans::Go(char* filename, int size_population, int it, const std::vector<
 
 int main(int argc, char** argv) {
     std::vector<int> nb_clusters;
-    if(argc >= 5) {
-        for(int i = 4; i < argc; i++) {
+
+    string w = argv[argc - 1];
+
+    bool save = false;
+    int lim_clusters = argc;
+
+    if(w == "w") {
+        save = true;
+        lim_clusters -= 1;
+    }
+
+    if(argc >= 6) {
+        for(int i = 5; i < lim_clusters; i++) {
             nb_clusters.push_back(atoi(argv[i]));
         }
         HGMeans hgmeans;
-        hgmeans.Go(argv[1], atoi(argv[2]), atoi(argv[3]), nb_clusters);
+        hgmeans.Go(argv[1], atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), nb_clusters, save);
     } else {
         cerr << "Insufficient number of parameters provided. Please use the following input format:" << 
-        endl << "./hgmeans DatasetPath Pi_min N2 [M]" << endl;
+        endl << "./hgmeans DATASET_PATH PI_MIN N2 NB_IT [M]" << endl;
     }
     return 0;
 }

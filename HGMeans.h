@@ -11,8 +11,8 @@
 #include <sstream>
 #include <iomanip>
 #include <ctime>
-
-#define SAVE_FILE false
+#include <sys/types.h>
+#include <sys/stat.h>
 
 class InputValidator {
     
@@ -30,13 +30,15 @@ class InputValidator {
 
         int max_it;
 
+        int nb_it;
+
         vector<int> nb_clusters;
 
     public:
 
-        InputValidator(std::string filename, int size_population, int it, std::vector<int> m) {
+        InputValidator(std::string filename, int size_population, int max, int it, std::vector<int> m) {
 
-            nb_arg = 3 + m.size();
+            nb_arg = 4 + m.size();
 
             // Dataset path
             dataset_path = filename;
@@ -44,8 +46,11 @@ class InputValidator {
             // Population size (Pi_min paramter)
             pi_min = size_population;
 
-            // Maxixum number of iterations parameter
-            max_it = it;
+            // Maximum number of iterations parameter
+            max_it = max;
+            
+            // Number of iterations (algorithm repetitions)
+            nb_it = it;
 
             // List with number of clusters
             nb_clusters = m;
@@ -76,14 +81,16 @@ class InputValidator {
 
         int GetMaxIt() { return max_it; };
 
+        int GetNbIt() { return nb_it; };
+
         vector<int> GetNbClusters() { return nb_clusters; };
 
         bool Validate() {
-            // At least 4 parameters should be provided:
-            // Dataset, size of population, maximum iterations and number of clusters
-            if(nb_arg < 4) {
+            // At least 5 parameters should be provided:
+            // Dataset, size of population, maximum iterations, number of repetitions, and number of clusters
+            if(nb_arg < 5) {
                 cerr << "Insufficient number of parameters provided. Please use the following input format:" << 
-                endl << "./hgmeans DatasetPath Pi_min N2 [M]" << endl;
+                endl << "./hgmeans DATASET_PATH PI_MIN N2 NB_IT [M]" << endl;
                 return false;
             }
             
@@ -103,6 +110,11 @@ class InputValidator {
                 cerr << "Max_it out of bounds" << endl;
                 return false;
             }
+
+            if(nb_it < 1 || nb_it > 100000) {
+                cerr << "Nb_it out of bounds" << endl;
+                return false;
+            }
                 
             for(int i = 0; i < nb_clusters.size(); i++) {
                 if(nb_clusters[i] < 1 || nb_clusters[i] > USHRT_MAX) { // Range for m must be [1, 65535]
@@ -118,7 +130,7 @@ class HGMeans {
     public:
         HGMeans();
         ~HGMeans();
-        void Go(char* filename, int size_population, int it, const std::vector<int>& m); 
+        void Go(char* filename, int size_population, int max_it, int nb_it, const std::vector<int>& m, bool save); 
 };
 
 #endif
