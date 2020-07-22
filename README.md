@@ -79,7 +79,7 @@ This script executes HG-means clustering for the "iris" dataset, with 10 solutio
 | .... | .... | .... | ... | .... |
 | x<sub>n1</sub> | x<sub>n2</sub> | x<sub>n3</sub> | ... | x<sub>nd</sub> |
 
-Some datasets are provided within folder `/data` in the HG-means repository.
+Some datasets are provided within the folder `/data` in the HG-means repository.
 
 **Labels files.** The content of a labels file exhibits the cluster of each sample of the dataset according to ground-truth, where y_i correspond to the label of the i-th sample:
 
@@ -91,4 +91,4 @@ y<sub>2</sub>
 
 y<sub>n</sub>
 
-**Important**: Labels files must have the `.label` extension. Some labels are provided within folder `/data` in the HG-means repository.
+**Important**: Labels files must have the `.label` extension. Some labels are provided within the folder `/data` in the HG-means repository.
