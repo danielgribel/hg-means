@@ -1,6 +1,6 @@
 # HG-means
 
-Source code of HG-means clustering (Gribel and Vidal, 2019)
+Source code of HG-means clustering (Gribel and Vidal, 2019).
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/4787247/116893857-71d92b00-abff-11eb-8593-70e170a3aea0.png" width="700" height="210">
