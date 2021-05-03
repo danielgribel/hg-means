@@ -1,6 +1,12 @@
 # HG-means
 
-Source code of HG-means clustering, an efficient hybrid genetic algorithm proposed for the minimum sum-of-squares clustering (MSSC). This population-based metaheuristic uses K-means as a local search in combination with crossover, mutation, and diversification operators.
+Source code of HG-means clustering (Gribel and Vidal, 2019)
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/4787247/116893857-71d92b00-abff-11eb-8593-70e170a3aea0.png" width="700" height="210">
+</p>
+
+HG-means is an efficient hybrid genetic algorithm proposed for the minimum sum-of-squares clustering (MSSC). This population-based metaheuristic uses K-means as a local search in combination with crossover, mutation, and diversification operators.
 
 As HG-means algorithm uses K-means, we included the fundamental source files of the fast K-means implementation of Greg Hamerly (to whom we are grateful for making the source code available) in this repository, under the folder `/hamerly`. Original files and complete source code of Greg Hamerly K-means can be found at: https://github.com/ghamerly/fast-kmeans.
 
