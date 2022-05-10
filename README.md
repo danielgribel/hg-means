@@ -70,7 +70,7 @@ That is it! Now, open your Python interface, import the package and create an in
 
 `>>> demo = hgmeans.PyHGMeans()`
 
-`>>> demo.run('data/iris.txt', 10, 5000, 1, [2,5,10], 'w')`
+`>>> demo.runfile('data/iris.txt', 10, 5000, 1, [2,5,10], 'w')`
 
 This script executes HG-means clustering in the *Iris* dataset, with 10 solutions in population, a maximum of 5000 iterations, 1 repetition, and 2, 5 and 10 clusters. Here the number of clusters is passed in an array, so values are separated by commas.
 
