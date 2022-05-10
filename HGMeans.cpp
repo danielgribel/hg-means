@@ -102,7 +102,7 @@ string FilenameOutput(PbData pb_data, bool save) {
     return filename_output.str();
 }
 
-void Run(int seed, PbData pb_data, const Dataset* x, bool save) {
+void RunFile(int seed, PbData pb_data, const Dataset* x, bool save) {
     srand(seed);
 
     ofstream writer_output;
@@ -142,6 +142,61 @@ void Run(int seed, PbData pb_data, const Dataset* x, bool save) {
     }
 }
 
+std::vector<int> Run(int seed, PbData pb_data, const Dataset* x, bool save) {
+    srand(seed);
+
+    ofstream writer_output;
+    stringstream filename_output;
+    filename_output << FilenameOutput(pb_data, save);
+    
+    // Clean file content if it already exists
+    if(save) {
+        SaveHeader(writer_output, filename_output, pb_data);
+    }
+    
+    std::vector<int> outcome(x->n);
+    double best_obj = MAX_FLOAT;
+
+    for(int i = 0; i < pb_data.GetParam().nb_runs; i++) {
+        clock_t begin = clock();
+
+        // Create GeneticOperations instance
+        GeneticOperations* genetic = new GeneticOperations(pb_data);
+
+        cout << "-- Starting optimization: " << pb_data.GetInstanceName()  << " dataset | m = " << pb_data.GetM() << " clusters" << endl;
+
+        // Run HG-Means algorithm
+        genetic->HGMeans(x);
+        
+        // Measure cpu time in seconds
+        double cpu_time = double(clock() - begin) / CLOCKS_PER_SEC;
+
+        if (pb_data.GetParam().eval && pb_data.GetM() == pb_data.GetNbClasses()) {
+            genetic->GetBestSolution()->ComputeExternalMetrics();
+        }
+
+        PrintResult(genetic, cpu_time);
+
+        if(save) {
+            // Save output results 
+            SaveOutput(writer_output, filename_output, genetic, cpu_time);
+        }
+
+        Solution* solution = genetic->GetBestSolution();
+        double obj = solution->GetCost();
+        if(obj < best_obj) {
+            best_obj = obj;
+            for(int i = 0; i < x->n; i++) {
+                outcome[i] = solution->GetAssignment()[i];
+            }
+        }
+
+        delete genetic;
+    }
+
+    return outcome;
+}
+
 Param LoadParam(InputValidator command) {
     Param param;
     param.size_population = command.GetPiMin();
@@ -177,6 +232,23 @@ const Dataset* LoadData(string data_path) {
     return x;
 }
 
+const Dataset* LoadData(std::vector< std::vector<double> > dataset) {
+    int n = dataset.size();
+    int d = dataset[0].size();
+
+    // Allocate storage
+    const Dataset *x = new Dataset(n, d);
+    
+    // Read the data values directly into the dataset
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < d; ++j) {
+            x->data[d*(i % n) + j] = dataset[i][j];
+        }
+    }
+
+    return x;
+}
+
 HGMeans::HGMeans() {
 
 }
@@ -185,11 +257,11 @@ HGMeans::~HGMeans() {
 
 }
 
-void HGMeans::Go(char* filename, int size_population, int max_it, int nb_it, const std::vector<int>& m, bool save) {
+void HGMeans::GoFile(char* filename, int size_population, int max_it, int nb_it, const std::vector<int>& m, bool save) {
     string filenme_str(filename);
     InputValidator command(filenme_str, size_population, max_it, nb_it, m);
 
-    if(command.Validate()) {
+    if(command.Validate(true)) {
         Param param = LoadParam(command);
         const Dataset* x = LoadData(command.GetDatasetPath());
         if (x == NULL) {
@@ -200,7 +272,7 @@ void HGMeans::Go(char* filename, int size_population, int max_it, int nb_it, con
         for(int i = 0; i < command.GetNbClusters().size(); i++) {
             if(command.GetNbClusters()[i] < pb_data.GetN()) { // m <= n
                 pb_data.SetM(command.GetNbClusters()[i]);
-                Run(16007, pb_data, x, save);
+                RunFile(16007, pb_data, x, save);
             } else {
                 cerr << "The number of clusters must be less than " << x->n << " (number of data points)" << endl;
             }
@@ -208,6 +280,51 @@ void HGMeans::Go(char* filename, int size_population, int max_it, int nb_it, con
         pb_data.DeleteGroundTruth();
         delete x;
     }
+}
+
+std::vector< std::vector<int> > HGMeans::Go(std::vector< std::vector<double> > dataset, std::vector<int> y, int size_population, int max_it, int nb_it, const std::vector<int>& m, bool save) {
+    string filenme_str("temp");
+    InputValidator command(filenme_str, size_population, max_it, nb_it, m);
+
+    std::vector< std::vector<int> > results;
+
+    if(command.Validate(false)) {
+        Param param = LoadParam(command);
+        const Dataset* x = LoadData(dataset);
+        if (x == NULL) {
+            cerr << "Please load a dataset first" << endl;
+            return { {NULL} };
+        }
+        PbData pb_data(y, command.GetDatasetName(), x->data, x->n, x->d, param);
+        for(int i = 0; i < command.GetNbClusters().size(); i++) {
+            if(command.GetNbClusters()[i] < pb_data.GetN()) { // m <= n
+                pb_data.SetM(command.GetNbClusters()[i]);
+                std::vector<int> res = Run(16007, pb_data, x, save);
+                results.push_back(res);
+            } else {
+                cerr << "The number of clusters must be less than " << x->n << " (number of data points)" << endl;
+            }
+        }
+
+        // std::cout << "The X:" << "\n";
+        // for (int i = 0; i < x->n; ++i) {
+        //     for (int j = 0; j < x->d; ++j) {
+        //         std::cout << x->data[x->d*(i % x->n) + j] << " ";
+        //     }
+        //     std::cout << "\n";
+        // }
+
+        // std::cout << "The Y:" << "\n";
+        // for (int i = 0; i < x->n; ++i) {
+        //     std::cout << pb_data.GetTruthAssignment()[i] << " ";
+        // }
+        // std::cout << "\n";
+
+        pb_data.DeleteGroundTruth();
+        delete x;
+    }
+
+    return results;
 }
 
 int main(int argc, char** argv) {
@@ -228,7 +345,7 @@ int main(int argc, char** argv) {
             nb_clusters.push_back(atoi(argv[i]));
         }
         HGMeans hgmeans;
-        hgmeans.Go(argv[1], atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), nb_clusters, save);
+        hgmeans.GoFile(argv[1], atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), nb_clusters, save);
     } else {
         cerr << "Insufficient number of parameters provided. Please use the following input format:" << 
         endl << "./hgmeans DATASET_PATH PI_MIN N2 NB_IT [M]" << endl;

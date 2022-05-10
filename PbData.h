@@ -81,6 +81,23 @@ class PbData {
             LoadGroundTruth(path);
         };
 
+        PbData(std::vector<int> y, string instance_name, double* data, int n, int d, Param param) {
+            this->instance_name = instance_name;
+            this->data = data;
+            this->n = n;
+            this->d = d;
+            this->param = param;
+            this->truth_assignment = new unsigned short[n];
+            
+            nb_classes = 0;
+            for(int i = 0; i < n; i++) {
+                truth_assignment[i] = y[i] - 1;
+                if(truth_assignment[i] > nb_classes)
+                    nb_classes = truth_assignment[i];
+            }
+            nb_classes++;
+        };
+
         PbData() {};
 
         ~PbData() {};

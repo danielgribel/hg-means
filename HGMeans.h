@@ -85,7 +85,7 @@ class InputValidator {
 
         vector<int> GetNbClusters() { return nb_clusters; };
 
-        bool Validate() {
+        bool Validate(bool check_data_file) {
             // At least 5 parameters should be provided:
             // Dataset, size of population, maximum iterations, number of repetitions, and number of clusters
             if(nb_arg < 5) {
@@ -94,10 +94,12 @@ class InputValidator {
                 return false;
             }
             
-            ifstream input(dataset_path);
-            if (!input) {
-                cerr << "Unable to open data file: " << dataset_path << endl;
-                return false;
+            if(check_data_file) {
+                ifstream input(dataset_path);
+                if (!input) {
+                    cerr << "Unable to open data file: " << dataset_path << endl;
+                    return false;
+                }
             }
 
             // Checking bounds of variables
@@ -130,7 +132,8 @@ class HGMeans {
     public:
         HGMeans();
         ~HGMeans();
-        void Go(char* filename, int size_population, int max_it, int nb_it, const std::vector<int>& m, bool save); 
+        std::vector< std::vector<int> > Go(std::vector< std::vector<double> > dataset, std::vector<int> y, int size_population, int max_it, int nb_it, const std::vector<int>& m, bool save);
+        void GoFile(char* filename, int size_population, int max_it, int nb_it, const std::vector<int>& m, bool save);
 };
 
 #endif
