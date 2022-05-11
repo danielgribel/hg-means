@@ -78,7 +78,7 @@ Alternativaly, we can execute HG-means by passing the arrays representing the da
 
 `>>> import numpy`
 
-`>>> result = demo.run(numpy.array([[1,2,3], [4,5,6], [4,5,7], [4,5,8]]), numpy.array([1,2,2,2]), 10, 5000, 1, [2,3], 'w')`
+`>>> result = demo.run(numpy.array([[1,2,3], [4,5,6], [4,5,7]]), numpy.array([1,2,2]), 10, 5000, 1, [2], 'w')`
 
 ## Data format
 
