@@ -76,9 +76,7 @@ This script executes HG-means clustering in the *Iris* dataset, with 10 solution
 
 Alternativaly, we can execute HG-means by passing the arrays representing the dataset and labels. In this case, the run() function returns the clustering assignments for each number of clusters. See an example below:
 
-`>>> import numpy`
-
-`>>> result = demo.run(numpy.array([[1,2,3], [4,5,6], [4,5,7]]), numpy.array([1,2,2]), 10, 5000, 1, [2], 'w')`
+`>>> result = demo.run([[1,2,3], [4,5,6], [4,5,7], [4,5,8]], [1,2,2,2], 10, 5000, 1, [2,3], 'w')`
 
 ## Data format
 
