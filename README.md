@@ -58,7 +58,8 @@ https://cython.readthedocs.io/en/latest/src/quickstart/install.html -->
 
 HG-means is also available as a Python package. To install HG-means, run the following installation command:
 
-`> python -m pip install hgmeans`
+<!--`> python -m pip install hgmeans` -->
+`> pip3 install hgmeans`
 
 **Important:** Check your user permissions for pip installation. You may need root user credentials.
 
